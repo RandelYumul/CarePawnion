@@ -1,33 +1,43 @@
 import { useEffect, useState } from 'react'
-import { listSightings, createSighting, deleteSighting } from './api'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import {
+  listLogs, getLog, createLog, updateLog, deleteLog,
+  listPets, createPet, deletePet,
+} from './api'
+import Navigation from './components/Navigation.jsx'
+import Footer from './components/Footer.jsx'
 import DemoNotice from './components/DemoNotice.jsx'
+import Home from './pages/Home.jsx'
+import Logs from './pages/Logs.jsx'
+import Pets from './pages/Pets.jsx'
 
-// A deliberately small working app. Replace all of it with your own project.
-//
-// What is worth keeping is the SHAPE: four states rather than two, a loading
-// message that admits a free-tier server can be slow to wake, and errors that
-// say something rather than rendering an empty list.
+// App owns the data and talks to the API. The pages only own what is on
+// screen (forms, detail panel), and hand the work back through the on... props.
+// Each handler returns something truthy on success and null/false on failure,
+// because that is what the pages check before clearing their forms.
 
-const EMPTY_FORM = { place: '', description: '', spookiness: 3 }
+// The quick log buttons have no form, so remember who is logging.
+const MEMBER_KEY = 'carepawnion:member'
 
 export default function App() {
   const [status, setStatus] = useState('loading')   // loading | ready | error
   const [rows, setRows] = useState([])
+  const [pets, setPets] = useState([])
   const [error, setError] = useState(null)
   const [slow, setSlow] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [saving, setSaving] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   async function load() {
     setStatus('loading')
     setError(null)
 
-    // A free-tier API sleeps. If this is taking a while, say so rather than
-    // spinning silently, which looks broken. See page 6.
+    // A free-tier API sleeps. If this is taking a while, say so.
     const timer = setTimeout(() => setSlow(true), 3000)
 
     try {
-      setRows(await listSightings())
+      const [loadedRows, loadedPets] = await Promise.all([listLogs(), listPets()])
+      setRows(loadedRows)
+      setPets(loadedPets)
       setStatus('ready')
     } catch (caught) {
       setError(caught)
@@ -42,128 +52,167 @@ export default function App() {
     load()
   }, [])
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-    if (!form.place.trim()) return
+  // ---------- Pets page ----------
 
-    setSaving(true)
+  async function handleAddPet(input) {
+    setError(null)
     try {
-      const created = await createSighting({
-        place: form.place.trim(),
-        description: form.description.trim(),
-        spookiness: Number(form.spookiness),
-      })
-      setRows([created, ...rows])
-      setForm(EMPTY_FORM)
+      const created = await createPet(input)
+      setPets((previous) => [...previous, created])
+      return created
     } catch (caught) {
       setError(caught)
-    } finally {
-      setSaving(false)
+      return null
+    }
+  }
+
+  // The logs keep the pet NAME, so removing a pet does not erase their history.
+  async function handleDeletePet(pet) {
+    if (!confirm(`Remove ${pet.name}? Their logs stay in the list.`)) return
+
+    const previous = pets
+    setError(null)
+    setPets(pets.filter((item) => item.id !== pet.id))   // optimistic
+    try {
+      await deletePet(pet.id)
+    } catch (caught) {
+      setPets(previous)
+      setError(caught)
+    }
+  }
+
+  // ---------- Logs page ----------
+
+  // One handler, two jobs. No editingId means create, an editingId means update.
+  async function handleSave(input, editingId) {
+    setError(null)
+    try {
+      if (editingId) {
+        const updated = await updateLog(editingId, input)
+        setRows((previous) => previous.map((row) => (row.id === editingId ? updated : row)))
+        return updated
+      }
+      const created = await createLog(input)
+      setRows((previous) => [created, ...previous])
+      return created
+    } catch (caught) {
+      setError(caught)
+      return null
+    }
+  }
+
+  async function handleView(id) {
+    setError(null)
+    try {
+      return await getLog(id)
+    } catch (caught) {
+      setError(caught)
+      return null
     }
   }
 
   async function handleDelete(id) {
+    if (!confirm('Delete this log?')) return false
+
     const previous = rows
+    setError(null)
     setRows(rows.filter((row) => row.id !== id))   // optimistic
     try {
-      await deleteSighting(id)
+      await deleteLog(id)
+      return true
     } catch (caught) {
       setRows(previous)                            // put it back on failure
       setError(caught)
+      return false
     }
   }
 
+  // ---------- Home page ----------
+
+  // One tap from a pet card. Asks for a name only the first time.
+  async function handleQuickLog(pet, type) {
+    let member = localStorage.getItem(MEMBER_KEY)
+    if (!member) {
+      member = prompt('Who is logging this?')?.trim()
+      if (!member) return
+      localStorage.setItem(MEMBER_KEY, member)
+    }
+
+    setBusy(true)
+    await handleSave({ pet: pet.name, type, member, note: '' }, null)
+    setBusy(false)
+  }
+
+  // When was this pet last fed, and when was it last let out.
+  // rows arrives newest first, so the first match wins.
+  const summary = pets.map((pet) => {
+    const mine = rows.filter((row) => row.pet === pet.name)
+    return {
+      ...pet,
+      lastFed: mine.find((row) => row.type === 'fed'),
+      lastOut: mine.find((row) => row.type !== 'fed'),
+    }
+  })
+
   return (
     <div className="page">
-      <header>
-        <h1>HAUnted Sightings</h1>
-        <p className="lede">
-          Replace this with your own project. This one is here so the template
-          has something that works.
-        </p>
-      </header>
 
-      <DemoNotice />
+      <a className="skip-link" href="#main">Skip to content</a>
 
-      {error && (
-        <p className="error" role="alert">
-          {error.message} <button onClick={load}>Try again</button>
-        </p>
-      )}
+      <Navigation />
 
-      <form onSubmit={handleSubmit} className="card">
-        <h2>Report a sighting</h2>
+      {/* main, not div, so screen readers know where the screen starts.
+          tabIndex -1 lets the skip link move focus here. */}
+      <main id="main" className="page-body" tabIndex={-1}>
+        {error && (
+          <p className="error" role="alert">
+            {error.message}{' '}
+            {status === 'error' && <button className="ghost" onClick={load}>Try again</button>}
+          </p>
+        )}
 
-        <label htmlFor="place">Place</label>
-        <input
-          id="place"
-          value={form.place}
-          onChange={(event) => setForm({ ...form, place: event.target.value })}
-          maxLength={120}
-          required
-        />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home summary={summary} status={status} busy={busy} onLog={handleQuickLog} rows={rows} />
+            }
+          />
+          <Route
+            path="/logs"
+            element={
+              <Logs
+                status={status}
+                slow={slow}
+                rows={rows}
+                pets={pets}
+                onSave={handleSave}
+                onView={handleView}
+                onDelete={handleDelete}
+              />
+            }
+          />
+          <Route path="/logs/new" element={<Navigate to="/logs" replace />} />
+          <Route
+            path="/pets"
+            element={
+              <Pets
+                status={status}
+                slow={slow}
+                summary={summary}
+                onAdd={handleAddPet}
+                onRemove={handleDeletePet}
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
-        <label htmlFor="description">What happened</label>
-        <textarea
-          id="description"
-          value={form.description}
-          onChange={(event) => setForm({ ...form, description: event.target.value })}
-          maxLength={2000}
-          rows={3}
-        />
-
-        <label htmlFor="spookiness">Spookiness, 1 to 5</label>
-        <input
-          id="spookiness"
-          type="number"
-          min="1"
-          max="5"
-          value={form.spookiness}
-          onChange={(event) => setForm({ ...form, spookiness: event.target.value })}
-          required
-        />
-
-        <button type="submit" disabled={saving}>
-          {saving ? 'Saving...' : 'Add sighting'}
-        </button>
-      </form>
-
-      {/* Four states. Empty and error are different things and must not look
-          the same: an empty list means "nothing here yet", an error means
-          "we could not find out". */}
-      {status === 'loading' && (
-        <p className="muted">
-          Loading{slow ? '. The server may be waking up, which can take up to a minute.' : '...'}
-        </p>
-      )}
-
-      {status === 'ready' && rows.length === 0 && (
-        <p className="muted">No sightings reported yet. Add the first one above.</p>
-      )}
-
-      {status === 'ready' && rows.length > 0 && (
-        <ul className="list">
-          {rows.map((row) => (
-            <li key={row.id} className="card">
-              <div className="row-head">
-                <h3>{row.place}</h3>
-                <span className="spooky" aria-label={`Spookiness ${row.spookiness} of 5`}>
-                  {'*'.repeat(row.spookiness)}
-                </span>
-              </div>
-              {row.description
-                ? <p>{row.description}</p>
-                : <p className="muted">No description given.</p>}
-              <footer>
-                <time dateTime={row.reported_at}>
-                  {new Date(row.reported_at).toLocaleString()}
-                </time>
-                <button onClick={() => handleDelete(row.id)}>Delete</button>
-              </footer>
-            </li>
-          ))}
-        </ul>
-      )}
+        <div className="content">
+          <DemoNotice />
+        </div>
+      </main>
+      <Footer />
     </div>
   )
 }
