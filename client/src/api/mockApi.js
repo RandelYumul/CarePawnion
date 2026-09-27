@@ -10,7 +10,11 @@
 
 import seed from './seed.json'
 
-const KEY = 'carepawnion:logs'
+// The key carries a version. Vet logs added two fields to a row, and a
+// browser that already visited the old build has the old rows saved. Bumping
+// the key hands those visitors the new seed instead of a list with no vet
+// visits in it.
+const KEY = 'carepawnion:logs:v2'
 
 // A real network is not instant. Keeping this delay is what forces you to build
 // a loading state now, while it is cheap, instead of discovering you need one
@@ -26,6 +30,8 @@ function seedRows() {
     type: 'fed',
     member: row.member,
     note: row.food,
+    vet_kind: null,
+    next_visit: null,
     happened_at: row.happened_at,
   }))
 
@@ -35,10 +41,26 @@ function seedRows() {
     type: row.type,
     member: row.member,
     note: row.note,
+    vet_kind: null,
+    next_visit: null,
     happened_at: row.happened_at,
   }))
 
-  return [...feedings, ...outings]
+  // A vet visit is a log like any other. The two extra fields are the only
+  // difference, and every other row carries them as null so the shape of a
+  // row never changes.
+  const visits = seed.vet.map((row) => ({
+    id: row.id,
+    pet: nameOf(row.pet_id),
+    type: 'vet',
+    member: row.member,
+    note: row.note,
+    vet_kind: row.kind,
+    next_visit: row.next_visit || null,
+    happened_at: row.happened_at,
+  }))
+
+  return [...feedings, ...outings, ...visits]
 }
 
 function read() {
@@ -119,6 +141,8 @@ export async function getLog(id) {
 export async function createLog(input) {
   await delay()
   const created = {
+    vet_kind: null,
+    next_visit: null,
     ...input,
     id: crypto.randomUUID(),
     happened_at: new Date().toISOString(),

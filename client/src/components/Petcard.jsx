@@ -6,15 +6,15 @@
 // buttons hand the work back to whoever rendered it. That keeps createLog in
 // one place instead of in every card.
 //
-// Each button is green if it was done within the limit in format.js, and red
+// Each button is green if it was done within the household's limit, and red
 // if the pet is due. The time ago is also written out, so the colour is not
 // the only thing saying it.
 
 import { LIMITS, isDue, timeAgo, ageOf } from '../format.js'
 
-export default function PetCard({ pet, onLog, onView, busy = false, now = new Date() }) {
-  const fedDue = isDue(pet.lastFed?.happened_at, LIMITS.fed, now)
-  const outDue = isDue(pet.lastOut?.happened_at, LIMITS.out, now)
+export default function PetCard({ pet, onLog, onView, busy = false, now = new Date(), limits = LIMITS }) {
+  const fedDue = isDue(pet.lastFed?.happened_at, limits.fed, now)
+  const outDue = isDue(pet.lastOut?.happened_at, limits.out, now)
   const age = ageOf(pet.birthdate, now)
 
   return (
@@ -43,7 +43,7 @@ export default function PetCard({ pet, onLog, onView, busy = false, now = new Da
               to record it before you walk away and forget. */}
           <button
             className={`chip ${fedDue ? 'chip-due' : 'chip-ok'}`}
-            title={fedDue ? `Due, over ${LIMITS.fed} hours since last fed` : 'Fed recently'}
+            title={fedDue ? `Due, over ${limits.fed} hours since last fed` : 'Fed recently'}
             onClick={() => onLog(pet, 'fed')}
             disabled={busy}
           >
@@ -52,7 +52,7 @@ export default function PetCard({ pet, onLog, onView, busy = false, now = new Da
 
           <button
             className={`chip ${outDue ? 'chip-due' : 'chip-ok'}`}
-            title={outDue ? `Due, over ${LIMITS.out} hours since last out` : 'Out recently'}
+            title={outDue ? `Due, over ${limits.out} hours since last out` : 'Out recently'}
             onClick={() => onLog(pet, 'poop')}
             disabled={busy}
           >

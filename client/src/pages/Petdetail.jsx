@@ -1,19 +1,70 @@
 import { Link, useParams } from 'react-router-dom'
-import { labelOf, formatWhen, ageOf } from '../format.js'
+import {
+  labelOf, vetKindOf, formatWhen, formatTime, formatDate,
+  dayLabel, ageOf, visitLabel, isVisitDue,
+} from '../format.js'
 
-// One pet on its own page. The first box is the photo and info, and the list
-// below is every log for this pet.
+// One pet on its own page. The profile box on top, the check up box and the
+// routine box in the middle, and every log for this pet grouped by day below.
 //
 // Like the other pages, it owns no data. summary and rows come from App, so
 // a log added on the Logs page shows up here without loading anything again.
 // There is no getPet yet, so the pet is found in the list App already has.
 
-// '2021-03-14' to "Mar 14, 2021". Split by hand for the same timezone reason
-// as ageOf in format.js.
-function formatBirthday(birthdate) {
-  const [year, month, day] = String(birthdate).slice(0, 10).split('-').map(Number)
-  if (!year || !month || !day) return 'Unknown'
-  return new Date(year, month - 1, day).toLocaleDateString([], { dateStyle: 'medium' })
+// 0 to "12 AM", 13 to "1 PM". Written out, because 13:00 is not how the
+// house talks about walking the dog.
+function hourLabel(hour) {
+  if (hour === 0) return '12 AM'
+  if (hour < 12) return `${hour} AM`
+  if (hour === 12) return '12 PM'
+  return `${hour - 12} PM`
+}
+
+// Same grouping as the Logs page. rows arrive newest first, so walking them
+// in order already gives the days in order.
+function groupByDay(rows, now) {
+  const groups = []
+  for (const row of rows) {
+    const label = dayLabel(row.happened_at, now)
+    const last = groups[groups.length - 1]
+    if (last && last.label === label) last.rows.push(row)
+    else groups.push({ label, rows: [row] })
+  }
+  return groups
+}
+
+// When does this pet usually do one thing. Counting single hours is too
+// strict, because 6:50 and 7:10 are the same habit, so the busiest three
+// hour window is used as the usual time instead.
+function routineOf(logs, type) {
+  const mine = logs.filter((row) => row.type === type)
+  if (mine.length === 0) return null
+
+  const hours = new Array(24).fill(0)
+  for (const row of mine) {
+    const date = new Date(row.happened_at)
+    if (!Number.isNaN(date.getTime())) hours[date.getHours()] += 1
+  }
+
+  let start = 0
+  let inWindow = -1
+  for (let hour = 0; hour < 24; hour += 1) {
+    const count = hours[hour] + hours[(hour + 1) % 24] + hours[(hour + 2) % 24]
+    if (count > inWindow) {
+      inWindow = count
+      start = hour
+    }
+  }
+
+  return {
+    type,
+    total: mine.length,
+    hours,
+    busiest: Math.max(...hours),
+    start,
+    end: (start + 3) % 24,
+    inWindow,
+  }
 }
 
 export default function PetDetail({ status, slow, summary, rows }) {
@@ -54,7 +105,21 @@ export default function PetDetail({ status, slow, summary, rows }) {
     )
   }
 
-  const age = ageOf(pet.birthdate)
+  const now = new Date()
+  const age = ageOf(pet.birthdate, now)
+  const groups = groupByDay(logs, now)
+
+  // Every vet visit for this pet, newest first. pet.nextVisit already holds
+  // the date from the newest visit that booked one, so it is not worked out
+  // again here.
+  const visits = logs.filter((row) => row.type === 'vet')
+  const visitDue = isVisitDue(pet.nextVisit, now)
+
+  // Bathroom first, since that is what the routine box is for. Vet is left
+  // out, because a check up twice a year has no usual hour.
+  const routines = ['pee', 'poop', 'walk', 'fed']
+    .map((type) => routineOf(logs, type))
+    .filter(Boolean)
 
   return (
     <section className="content">
@@ -67,32 +132,142 @@ export default function PetDetail({ status, slow, summary, rows }) {
 
         <div className="pet-profile-info">
           <h1>{pet.name}</h1>
+          <p className="species">
+            {[pet.species, pet.breed, age].filter(Boolean).join(', ')}
+          </p>
+
+          {/* The three things people open this page for, before the full list. */}
+          <div className="pet-stats">
+            <div className="pet-stat">
+              <span className="pet-stat-label">Last fed</span>
+              <strong>{pet.lastFed ? formatWhen(pet.lastFed.happened_at) : 'No record yet'}</strong>
+              {pet.lastFed && <span className="by">by {pet.lastFed.member}</span>}
+            </div>
+            <div className="pet-stat">
+              <span className="pet-stat-label">Last out</span>
+              <strong>
+                {pet.lastOut
+                  ? `${labelOf(pet.lastOut.type)}, ${formatWhen(pet.lastOut.happened_at)}`
+                  : 'No record yet'}
+              </strong>
+              {pet.lastOut && <span className="by">by {pet.lastOut.member}</span>}
+            </div>
+            <div className="pet-stat">
+              <span className="pet-stat-label">Total logs</span>
+              <strong>{logs.length}</strong>
+              <span className="by">since the first entry</span>
+            </div>
+          </div>
 
           <dl className="detail-list">
-            <dt>Type</dt><dd>{pet.species}</dd>
-            <dt>Breed</dt><dd>{pet.breed || <span className="muted">Not given</span>}</dd>
             <dt>Birthday</dt>
             <dd>
               {pet.birthdate
-                ? <>{formatBirthday(pet.birthdate)}{age && <span className="by">, {age} old</span>}</>
+                ? formatDate(pet.birthdate)
                 : <span className="muted">Not given</span>}
             </dd>
-            <dt>Last fed</dt>
-            <dd>
-              {pet.lastFed
-                ? <>{formatWhen(pet.lastFed.happened_at)} <span className="by">by {pet.lastFed.member}</span></>
-                : <span className="muted">No record yet</span>}
-            </dd>
-            <dt>Last out</dt>
-            <dd>
-              {pet.lastOut
-                ? <>{labelOf(pet.lastOut.type)}, {formatWhen(pet.lastOut.happened_at)} <span className="by">by {pet.lastOut.member}</span></>
-                : <span className="muted">No record yet</span>}
-            </dd>
-            <dt>Total logs</dt><dd>{logs.length}</dd>
           </dl>
         </div>
       </article>
+
+      <h2 className="section-head">Check ups</h2>
+
+      {visits.length === 0 && (
+        <p className="muted">
+          No vet visit logged for {pet.name} yet. <Link to="/logs">Log one</Link>
+        </p>
+      )}
+
+      {visits.length > 0 && (
+        <div className="card vet-box">
+          {/* The next date is the whole reason this box exists, so it sits on
+              top and turns red once the day has passed. */}
+          <div className={`vet-next${visitDue ? ' vet-due' : ''}`}>
+            <span className="vet-next-label">Next check up</span>
+            {pet.nextVisit
+              ? (
+                <>
+                  <strong className="vet-next-date">{formatDate(pet.nextVisit)}</strong>
+                  <span className="vet-next-when">{visitLabel(pet.nextVisit, now)}</span>
+                </>
+              )
+              : <strong className="vet-next-date">None booked</strong>}
+          </div>
+
+          <ul className="list vet-list">
+            {visits.map((visit) => (
+              <li key={visit.id} className="vet-row">
+                <div className="vet-row-head">
+                  <span className="tag tag-vet">{vetKindOf(visit.vet_kind)}</span>
+                  <strong className="vet-when">{formatWhen(visit.happened_at)}</strong>
+                  <span className="by">by {visit.member}</span>
+                </div>
+
+                {visit.note && <p className="note">{visit.note}</p>}
+
+                {visit.next_visit && (
+                  <p className="vet-booked muted">
+                    Booked a follow up for {formatDate(visit.next_visit)}.
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <h2 className="section-head">Usual times</h2>
+
+      {routines.length === 0 && (
+        <p className="muted">
+          Nothing to read yet. The usual times appear once {pet.name} has a few logs.
+        </p>
+      )}
+
+      {routines.length > 0 && (
+        <div className="card routine">
+          <p className="muted routine-intro">
+            Each bar is one hour of the day, counted from every log so far.
+            Taller means it happens more often at that hour.
+          </p>
+
+          {routines.map((routine) => (
+            <div key={routine.type} className="routine-row">
+              <div className="routine-head">
+                <span className={`tag tag-${routine.type}`}>{labelOf(routine.type)}</span>
+                <strong className="routine-usual">
+                  Usually {hourLabel(routine.start)} to {hourLabel(routine.end)}
+                </strong>
+                <span className="muted routine-count">
+                  {routine.inWindow} of {routine.total} log{routine.total === 1 ? '' : 's'}
+                </span>
+              </div>
+
+              {/* 24 bars, one per hour. The height is a share of the busiest
+                  hour, so a quiet pet still gets a readable shape. */}
+              <div className="routine-bars" role="img"
+                aria-label={`${labelOf(routine.type)} happens most often between ${hourLabel(routine.start)} and ${hourLabel(routine.end)}`}>
+                {routine.hours.map((count, hour) => (
+                  <span
+                    key={hour}
+                    className={`routine-bar${count > 0 ? ' filled' : ''}`}
+                    title={`${hourLabel(hour)}, ${count} log${count === 1 ? '' : 's'}`}
+                  >
+                    <span
+                      className="routine-bar-fill"
+                      style={{ height: `${count === 0 ? 4 : (count / routine.busiest) * 100}%` }}
+                    />
+                  </span>
+                ))}
+              </div>
+
+              <div className="routine-scale">
+                <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <h2 className="section-head">Logs for {pet.name}</h2>
 
@@ -102,27 +277,36 @@ export default function PetDetail({ status, slow, summary, rows }) {
         </p>
       )}
 
-      {logs.length > 0 && (
-        <ul className="list">
-          {logs.map((row) => (
-            <li key={row.id} className="card row">
-              <div className="row-head">
-                {/* The pet is already the page title, so the row leads with the time. */}
-                <h3><time dateTime={row.happened_at}>{formatWhen(row.happened_at)}</time></h3>
+      {/* One card per day instead of one card per log, the same as the Logs
+          page, so the two lists read alike. */}
+      {groups.map((group) => (
+        <section key={group.label} className="card day-group">
+          <div className="day-head">
+            <h3>{group.label}</h3>
+            <span className="muted">{group.rows.length} log{group.rows.length === 1 ? '' : 's'}</span>
+          </div>
+
+          <ul className="list day-rows">
+            {group.rows.map((row) => (
+              <li key={row.id} className="log-row">
+                <time className="log-time" dateTime={row.happened_at}>
+                  {formatTime(row.happened_at)}
+                </time>
+
                 <span className={`tag tag-${row.type}`}>{labelOf(row.type)}</span>
-              </div>
 
-              {row.note
-                ? <p className="note">{row.note}</p>
-                : <p className="muted note">No note given.</p>}
+                {row.type === 'vet' && row.vet_kind && (
+                  <span className="log-kind">{vetKindOf(row.vet_kind)}</span>
+                )}
 
-              <footer>
-                <span>by {row.member}</span>
-              </footer>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span className="log-member">by {row.member}</span>
+
+                {row.note && <span className="log-note">{row.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
     </section>
   )
 }

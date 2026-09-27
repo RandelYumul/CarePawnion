@@ -4,6 +4,7 @@ import {
   listLogs, getLog, createLog, updateLog, deleteLog,
   listPets, createPet, deletePet,
 } from './api'
+import { isOut, LIMITS } from './format.js'
 import Navigation from './components/Navigation.jsx'
 import Footer from './components/Footer.jsx'
 import DemoNotice from './components/DemoNotice.jsx'
@@ -20,6 +21,21 @@ import PetDetail from './pages/Petdetail.jsx'
 // The quick log buttons have no form, so remember who is logging.
 const MEMBER_KEY = 'carepawnion:member'
 
+// The hour limits are kept in this browser too, the same way as the member.
+const LIMITS_KEY = 'carepawnion:limits'
+
+// Saved limits win over the defaults in format.js. A missing or broken entry
+// falls back to the defaults instead of breaking the status board.
+function readLimits() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LIMITS_KEY))
+    if (saved && saved.fed > 0 && saved.out > 0) return saved
+  } catch {
+    localStorage.removeItem(LIMITS_KEY)
+  }
+  return LIMITS
+}
+
 export default function App() {
   const [status, setStatus] = useState('loading')   // loading | ready | error
   const [rows, setRows] = useState([])
@@ -27,6 +43,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [slow, setSlow] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [limits, setLimits] = useState(readLimits)
 
   async function load() {
     setStatus('loading')
@@ -128,9 +145,19 @@ export default function App() {
     }
   }
 
+  // No API call, since the limits live in this browser only. Returns the
+  // limits so the page can close its form, same as the other handlers.
+  function handleSetLimits(input) {
+    localStorage.setItem(LIMITS_KEY, JSON.stringify(input))
+    setLimits(input)
+    return input
+  }
+
   // ---------- Home page ----------
 
   // One tap from a pet card. Asks for a name only the first time.
+  // A vet visit is not here on purpose, because it needs the kind and the
+  // next date, and those need a form.
   async function handleQuickLog(pet, type) {
     let member = localStorage.getItem(MEMBER_KEY)
     if (!member) {
@@ -144,14 +171,22 @@ export default function App() {
     setBusy(false)
   }
 
-  // When was this pet last fed, and when was it last let out.
-  // rows arrives newest first, so the first match wins.
+  // When was this pet last fed, when was it last let out, and where does the
+  // vet stand. rows arrives newest first, so the first match wins.
   const summary = pets.map((pet) => {
     const mine = rows.filter((row) => row.pet === pet.name)
+    const visits = mine.filter((row) => row.type === 'vet')
+
     return {
       ...pet,
       lastFed: mine.find((row) => row.type === 'fed'),
-      lastOut: mine.find((row) => row.type !== 'fed'),
+      // isOut, not "anything that is not fed", or a check up would count as
+      // a bathroom trip and the pet card would turn green for the wrong reason.
+      lastOut: mine.find((row) => isOut(row.type)),
+      lastVet: visits[0],
+      // The newest visit that booked a follow up. A newer visit replaces an
+      // older plan, so only the first match counts.
+      nextVisit: visits.find((row) => row.next_visit)?.next_visit ?? null,
     }
   })
 
@@ -176,7 +211,7 @@ export default function App() {
           <Route
             path="/"
             element={
-              <Home summary={summary} status={status} busy={busy} onLog={handleQuickLog} rows={rows} />
+              <Home summary={summary} status={status} busy={busy} limits={limits} onLog={handleQuickLog} rows={rows} />
             }
           />
           <Route
@@ -188,9 +223,11 @@ export default function App() {
                 rows={rows}
                 pets={pets}
                 summary={summary}
+                limits={limits}
                 onSave={handleSave}
                 onView={handleView}
                 onDelete={handleDelete}
+                onSetLimits={handleSetLimits}
               />
             }
           />
@@ -207,15 +244,12 @@ export default function App() {
               />
             }
           />
+          {/* One pet on its own page. It reads from summary and rows, so it
+              needs no data of its own and no extra API call. */}
           <Route
             path="/pets/:id"
             element={
-              <PetDetail 
-                status={status} 
-                slow={slow} 
-                summary={summary} 
-                rows={rows} 
-              />
+              <PetDetail status={status} slow={slow} summary={summary} rows={rows} />
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,19 +1,25 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  TYPES, LIMITS, labelOf, formatWhen, formatTime, timeAgo, dayLabel, isDue,
+  TYPES, LIMITS, VET_KINDS, labelOf, vetKindOf,
+  formatWhen, formatTime, formatDate, timeAgo, dayLabel, isDue, isOut, visitLabel,
 } from '../format.js'
 
 // The Logs page. A short status board on top, the log form behind a button,
 // one log loaded on its own, and the history grouped by day.
 //
 // App owns the rows and talks to the API. This page owns the form, whether
-// the form is open, and the detail panel. onSave, onView and onDelete hand
-// the work back to App.
+// the form is open, the limits form, and the detail panel. onSave, onView,
+// onDelete and onSetLimits hand the work back to App.
 
 // types is a list, so one submit can log pee and poop at the same time.
 // Each checked type still becomes its own log, since a log has one type.
-const EMPTY_FORM = { pet: '', types: ['fed'], member: '', note: '' }
+// vetKind and nextVisit are only sent when the type is vet.
+const EMPTY_FORM = { pet: '', types: ['fed'], member: '', note: '', vetKind: 'vaccine', nextVisit: '' }
+
+// Local date, not toISOString, or the earliest allowed next visit is
+// yesterday before 8am in PH.
+const today = () => new Date().toLocaleDateString('en-CA')
 
 // Same day as now, used for the counts on the status board.
 function isToday(iso, now) {
@@ -36,29 +42,52 @@ function groupByDay(rows, now) {
   return groups
 }
 
-export default function Logs({ status, slow, rows, pets, summary, onSave, onView, onDelete }) {
+export default function Logs({ status, slow, rows, pets, summary, limits, onSave, onView, onDelete, onSetLimits }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
+
+  // Kept as text while typing, so clearing the box does not turn into 0.
+  const [limitsForm, setLimitsForm] = useState({ fed: '', out: '' })
+  const [showLimits, setShowLimits] = useState(false)
 
   const [detail, setDetail] = useState(null)
   const [detailStatus, setDetailStatus] = useState('idle')  // idle | loading | ready
 
   const now = new Date()
   const groups = groupByDay(rows, now)
-  const today = rows.filter((row) => isToday(row.happened_at, now))
+  const todayRows = rows.filter((row) => isToday(row.happened_at, now))
 
-  // Editing changes one log, so only one type can be checked there.
+  // A vet visit carries its own fields, so the form changes shape for it.
+  const isVet = form.types.includes('vet')
+
   function toggleType(value) {
+    // Editing changes one log, so only one type can be checked there.
     if (editingId) {
       setForm({ ...form, types: [value] })
       return
     }
-    const types = form.types.includes(value)
-      ? form.types.filter((item) => item !== value)
-      : [...form.types, value]
+    // A vet visit is on its own. Pee and poop go together fine, but a check
+    // up with a next date cannot be half of a pair.
+    if (value === 'vet') {
+      setForm({ ...form, types: isVet ? [] : ['vet'] })
+      return
+    }
+    const kept = form.types.filter((item) => item !== 'vet')
+    const types = kept.includes(value)
+      ? kept.filter((item) => item !== value)
+      : [...kept, value]
     setForm({ ...form, types })
+  }
+
+  // Both vet fields are always sent, set for a vet visit and null for
+  // everything else. Sending null clears them when a log is edited from a
+  // vet visit into something else, and it keeps every row the same shape.
+  function vetFieldsFor(type) {
+    return type === 'vet'
+      ? { vet_kind: form.vetKind, next_visit: form.nextVisit || null }
+      : { vet_kind: null, next_visit: null }
   }
 
   // One form, two jobs. No editingId means create, an editingId means update.
@@ -75,7 +104,8 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
     setSaving(true)
 
     if (editingId) {
-      const saved = await onSave({ ...base, type: form.types[0] }, editingId)
+      const type = form.types[0]
+      const saved = await onSave({ ...base, type, ...vetFieldsFor(type) }, editingId)
       setSaving(false)
       // If it failed, App shows the error and the form keeps what was typed.
       if (!saved) return
@@ -89,7 +119,7 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
     // One log per checked type, one after another. Same pet, person and note.
     const done = []
     for (const type of form.types) {
-      const saved = await onSave({ ...base, type }, null)
+      const saved = await onSave({ ...base, type, ...vetFieldsFor(type) }, null)
       if (!saved) {
         // Uncheck the ones that already saved, so trying again does not
         // log them twice.
@@ -106,9 +136,46 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
     setShowForm(false)
   }
 
+  // Only one form open at a time, so the top of the page stays short.
+  function toggleForm() {
+    setShowLimits(false)
+    setShowForm(!showForm)
+  }
+
+  // Opens with the current limits filled in, so a small change stays small.
+  function toggleLimits() {
+    setShowForm(false)
+    setLimitsForm({ fed: String(limits.fed), out: String(limits.out) })
+    setShowLimits(!showLimits)
+  }
+
+  function handleLimitsSubmit(event) {
+    event.preventDefault()
+    const fed = Number(limitsForm.fed)
+    const out = Number(limitsForm.out)
+    if (!Number.isInteger(fed) || !Number.isInteger(out) || fed < 1 || out < 1) return
+
+    onSetLimits({ fed, out })
+    setShowLimits(false)
+  }
+
+  function resetLimits() {
+    onSetLimits(LIMITS)
+    setShowLimits(false)
+  }
+
   function startEdit(row) {
+    setShowLimits(false)
     setEditingId(row.id)
-    setForm({ pet: row.pet, types: [row.type], member: row.member, note: row.note ?? '' })
+    setForm({
+      pet: row.pet,
+      types: [row.type],
+      member: row.member,
+      note: row.note ?? '',
+      vetKind: row.vet_kind ?? 'vaccine',
+      // The input needs 'YYYY-MM-DD', and the API may hand back a full date.
+      nextVisit: row.next_visit ? String(row.next_visit).slice(0, 10) : '',
+    })
     setShowForm(true)
     // The form is at the top and the row can be far down the list.
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -146,10 +213,17 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
     <section className="content">
       <div className="page-head">
         <h1>Logs</h1>
-        {pets.length > 0 && !editingId && (
-          <button className="ghost" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Log care'}
-          </button>
+        {!editingId && (
+          <span className="row-buttons">
+            {pets.length > 0 && (
+              <button className="ghost" onClick={toggleForm}>
+                {showForm ? 'Cancel' : 'Log care'}
+              </button>
+            )}
+            <button className="ghost" onClick={toggleLimits}>
+              {showLimits ? 'Cancel' : 'Set limits'}
+            </button>
+          </span>
         )}
       </div>
 
@@ -159,121 +233,214 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
         </p>
       )}
 
-      {/* The numbers people actually come here for. The list below is the
-          proof, this is the answer. */}
-      {status === 'ready' && summary.length > 0 && (
-        <>
-          <p className="stat-line">
-            {today.length === 0
-              ? 'Nothing logged today yet.'
-              : `${today.length} log${today.length === 1 ? '' : 's'} today, ${rows.length} in total.`}
-          </p>
-
-          <div className="stat-grid">
-            {summary.map((pet) => {
-              const fedToday = today.filter((row) => row.pet === pet.name && row.type === 'fed').length
-              const outToday = today.filter((row) => row.pet === pet.name && row.type !== 'fed').length
-              const fedDue = isDue(pet.lastFed?.happened_at, LIMITS.fed, now)
-              const outDue = isDue(pet.lastOut?.happened_at, LIMITS.out, now)
-
-              return (
-                <article key={pet.id} className="card stat-card">
-                  <h3>{pet.name}</h3>
-
-                  <dl className="stat-list">
-                    <dt>Last fed</dt>
-                    <dd className={fedDue ? 'stat-due' : 'stat-ok'}>
-                      {pet.lastFed ? timeAgo(pet.lastFed.happened_at, now) : 'No record yet'}
-                    </dd>
-                    <dt>Last out</dt>
-                    <dd className={outDue ? 'stat-due' : 'stat-ok'}>
-                      {pet.lastOut ? timeAgo(pet.lastOut.happened_at, now) : 'No record yet'}
-                    </dd>
-                  </dl>
-
-                  <p className="stat-today">
-                    Today, fed {fedToday} time{fedToday === 1 ? '' : 's'} and
-                    {' '}out {outToday} time{outToday === 1 ? '' : 's'}.
-                  </p>
-                </article>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      {/* The form only opens when someone is logging, so the page starts on
-          the numbers and not on empty fields. */}
-      {pets.length > 0 && showForm && (
-        <form onSubmit={handleSubmit} className="card form">
-          <h2>{editingId ? 'Edit log' : 'Log care'}</h2>
-
-          <div className="fields">
-            <p className="field">
-              <label htmlFor="pet">Pet</label>
-              <select
-                id="pet"
-                value={form.pet}
-                onChange={(event) => setForm({ ...form, pet: event.target.value })}
-                required
-              >
-                <option value="">Choose a pet</option>
-                {pets.map((pet) => (
-                  <option key={pet.id} value={pet.name}>{pet.name}</option>
-                ))}
-              </select>
+      {/* Numbers first, then the forms. On a phone the CSS flips this, so a
+          form opens right under its button instead of below every stat card. */}
+      <div className="logs-top">
+        {/* The numbers people actually come here for. The list below is the
+            proof, this is the answer. */}
+        {status === 'ready' && summary.length > 0 && (
+          <div className="logs-stats">
+            <p className="stat-line">
+              {todayRows.length === 0
+                ? 'Nothing logged today yet.'
+                : `${todayRows.length} log${todayRows.length === 1 ? '' : 's'} today, ${rows.length} in total.`}
             </p>
 
-            {/* Checkboxes, not a select, so pee and poop can go in together. */}
-            <fieldset className="field type-picks">
-              <legend>{editingId ? 'What you did' : 'What you did, pick one or more'}</legend>
-              {TYPES.map((item) => (
-                <label key={item.value} className="type-pick">
+            <div className="stat-grid">
+              {summary.map((pet) => {
+                const mine = todayRows.filter((row) => row.pet === pet.name)
+                const fedToday = mine.filter((row) => row.type === 'fed').length
+                const outToday = mine.filter((row) => isOut(row.type)).length
+                const fedDue = isDue(pet.lastFed?.happened_at, limits.fed, now)
+                const outDue = isDue(pet.lastOut?.happened_at, limits.out, now)
+
+                return (
+                  <article key={pet.id} className="card stat-card">
+                    <h3>{pet.name}</h3>
+
+                    <dl className="stat-list">
+                      <dt>Last fed</dt>
+                      <dd className={fedDue ? 'stat-due' : 'stat-ok'}>
+                        {pet.lastFed ? timeAgo(pet.lastFed.happened_at, now) : 'No record yet'}
+                      </dd>
+                      <dt>Last out</dt>
+                      <dd className={outDue ? 'stat-due' : 'stat-ok'}>
+                        {pet.lastOut ? timeAgo(pet.lastOut.happened_at, now) : 'No record yet'}
+                      </dd>
+                      {/* Only when a follow up was actually booked, so a pet
+                          with no vet history shows nothing instead of a blank. */}
+                      {pet.nextVisit && (
+                        <>
+                          <dt>Next vet</dt>
+                          <dd>{formatDate(pet.nextVisit)}, {visitLabel(pet.nextVisit, now)}</dd>
+                        </>
+                      )}
+                    </dl>
+
+                    <p className="stat-today">
+                      Today, fed {fedToday} time{fedToday === 1 ? '' : 's'} and
+                      {' '}out {outToday} time{outToday === 1 ? '' : 's'}.
+                    </p>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* How many hours before a pet turns red. The same limits drive the
+            pet cards and the Hungry and Bathroom lists on Home. */}
+        {showLimits && (
+          <form onSubmit={handleLimitsSubmit} className="card form">
+            <h2>Set limits</h2>
+            <p className="muted">
+              Hours before a pet shows as due. Saved on this device only.
+            </p>
+
+            <div className="fields">
+              <p className="field">
+                <label htmlFor="limit-fed">Hours between meals</label>
+                <input
+                  id="limit-fed"
+                  type="number"
+                  min={1}
+                  max={72}
+                  step={1}
+                  value={limitsForm.fed}
+                  onChange={(event) => setLimitsForm({ ...limitsForm, fed: event.target.value })}
+                  required
+                />
+              </p>
+
+              <p className="field">
+                <label htmlFor="limit-out">Hours between bathroom trips</label>
+                <input
+                  id="limit-out"
+                  type="number"
+                  min={1}
+                  max={72}
+                  step={1}
+                  value={limitsForm.out}
+                  onChange={(event) => setLimitsForm({ ...limitsForm, out: event.target.value })}
+                  required
+                />
+              </p>
+            </div>
+
+            <p className="actions">
+              <button type="submit">Save limits</button>
+              <button type="button" className="ghost" onClick={resetLimits}>
+                Use defaults, {LIMITS.fed} and {LIMITS.out} hours
+              </button>
+            </p>
+          </form>
+        )}
+
+        {/* The form only opens when someone is logging, so the page starts on
+            the numbers and not on empty fields. */}
+        {pets.length > 0 && showForm && (
+          <form onSubmit={handleSubmit} className="card form">
+            <h2>{editingId ? 'Edit log' : 'Log care'}</h2>
+
+            <div className="fields">
+              <p className="field">
+                <label htmlFor="pet">Pet</label>
+                <select
+                  id="pet"
+                  value={form.pet}
+                  onChange={(event) => setForm({ ...form, pet: event.target.value })}
+                  required
+                >
+                  <option value="">Choose a pet</option>
+                  {pets.map((pet) => (
+                    <option key={pet.id} value={pet.name}>{pet.name}</option>
+                  ))}
+                </select>
+              </p>
+
+              {/* Checkboxes, not a select, so pee and poop can go in together. */}
+              <fieldset className="field type-picks">
+                <legend>{editingId ? 'What you did' : 'What you did, pick one or more'}</legend>
+                {TYPES.map((item) => (
+                  <label key={item.value} className="type-pick">
+                    <input
+                      type="checkbox"
+                      checked={form.types.includes(item.value)}
+                      onChange={() => toggleType(item.value)}
+                    />
+                    {item.label}
+                  </label>
+                ))}
+              </fieldset>
+
+              <p className="field">
+                <label htmlFor="member">Who did it</label>
+                <input
+                  id="member"
+                  value={form.member}
+                  onChange={(event) => setForm({ ...form, member: event.target.value })}
+                  maxLength={80}
+                  required
+                />
+              </p>
+            </div>
+
+            {/* The two vet fields only appear once Vet is picked, so the form
+                stays short for the everyday logs. */}
+            {isVet && (
+              <div className="fields vet-fields">
+                <p className="field">
+                  <label htmlFor="vet-kind">Kind of visit</label>
+                  <select
+                    id="vet-kind"
+                    value={form.vetKind}
+                    onChange={(event) => setForm({ ...form, vetKind: event.target.value })}
+                  >
+                    {VET_KINDS.map((item) => (
+                      <option key={item.value} value={item.value}>{item.label}</option>
+                    ))}
+                  </select>
+                </p>
+
+                <p className="field">
+                  <label htmlFor="next-visit">Next check up, optional</label>
                   <input
-                    type="checkbox"
-                    checked={form.types.includes(item.value)}
-                    onChange={() => toggleType(item.value)}
+                    id="next-visit"
+                    type="date"
+                    value={form.nextVisit}
+                    min={today()}
+                    onChange={(event) => setForm({ ...form, nextVisit: event.target.value })}
                   />
-                  {item.label}
-                </label>
-              ))}
-            </fieldset>
+                </p>
+              </div>
+            )}
 
             <p className="field">
-              <label htmlFor="member">Who did it</label>
-              <input
-                id="member"
-                value={form.member}
-                onChange={(event) => setForm({ ...form, member: event.target.value })}
-                maxLength={80}
-                required
+              <label htmlFor="note">
+                {isVet ? 'Details, vaccine name or what the vet said' : 'Note, food type or amount'}
+              </label>
+              <textarea
+                id="note"
+                value={form.note}
+                onChange={(event) => setForm({ ...form, note: event.target.value })}
+                maxLength={2000}
+                rows={3}
               />
             </p>
-          </div>
 
-          <p className="field">
-            <label htmlFor="note">Note, food type or amount</label>
-            <textarea
-              id="note"
-              value={form.note}
-              onChange={(event) => setForm({ ...form, note: event.target.value })}
-              maxLength={2000}
-              rows={3}
-            />
-          </p>
-
-          <p className="actions">
-            <button type="submit" disabled={saving || form.types.length === 0}>
-              {saving
-                ? 'Saving...'
-                : editingId
-                  ? 'Save changes'
-                  : form.types.length > 1 ? `Add ${form.types.length} logs` : 'Add log'}
-            </button>
-            <button type="button" className="ghost" onClick={cancelEdit}>Cancel</button>
-          </p>
-        </form>
-      )}
+            <p className="actions">
+              <button type="submit" disabled={saving || form.types.length === 0}>
+                {saving
+                  ? 'Saving...'
+                  : editingId
+                    ? 'Save changes'
+                    : form.types.length > 1 ? `Add ${form.types.length} logs` : 'Add log'}
+              </button>
+              <button type="button" className="ghost" onClick={cancelEdit}>Cancel</button>
+            </p>
+          </form>
+        )}
+      </div>
 
       {detailStatus !== 'idle' && (
         <section className="card detail">
@@ -290,6 +457,19 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
                 <dt>Id</dt><dd><code>{detail.id}</code></dd>
                 <dt>Pet</dt><dd>{detail.pet}</dd>
                 <dt>Type</dt><dd>{labelOf(detail.type)}</dd>
+                {/* Only a vet visit has these two, so they are skipped for
+                    every other type instead of showing an empty row. */}
+                {detail.type === 'vet' && (
+                  <>
+                    <dt>Kind of visit</dt><dd>{vetKindOf(detail.vet_kind)}</dd>
+                    <dt>Next check up</dt>
+                    <dd>
+                      {detail.next_visit
+                        ? <>{formatDate(detail.next_visit)} <span className="by">{visitLabel(detail.next_visit, now)}</span></>
+                        : <span className="muted">None booked</span>}
+                    </dd>
+                  </>
+                )}
                 <dt>Member</dt><dd>{detail.member}</dd>
                 <dt>Note</dt><dd>{detail.note || <span className="muted">None given</span>}</dd>
                 <dt>Happened</dt><dd>{formatWhen(detail.happened_at)}</dd>
@@ -328,10 +508,20 @@ export default function Logs({ status, slow, rows, pets, summary, onSave, onView
 
                 <span className={`tag tag-${row.type}`}>{labelOf(row.type)}</span>
 
+                {/* Vaccine or check up, right beside the Vet tag, because
+                    "Vet" on its own does not say what happened. */}
+                {row.type === 'vet' && row.vet_kind && (
+                  <span className="log-kind">{vetKindOf(row.vet_kind)}</span>
+                )}
+
                 <span className="log-pet">{row.pet}</span>
                 <span className="log-member">by {row.member}</span>
 
                 {row.note && <span className="log-note">{row.note}</span>}
+
+                {row.type === 'vet' && row.next_visit && (
+                  <span className="log-next">Next {formatDate(row.next_visit)}</span>
+                )}
 
                 <span className="row-buttons">
                   <button className="ghost" onClick={() => handleView(row.id)}>View</button>

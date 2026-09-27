@@ -6,7 +6,7 @@ import HomeRectangle from '../components/HomeRectangle.jsx'
 
 // The landing page. The masthead, the floating bar, and the status board.
 
-export default function Home({ summary, status, busy, onLog, rows }) {
+export default function Home({ summary, status, busy, limits, onLog, rows }) {
   const navigate = useNavigate()
   const [now, setNow] = useState(new Date())
 
@@ -35,7 +35,7 @@ export default function Home({ summary, status, busy, onLog, rows }) {
         </div>
       </header>
 
-      <HomeRectangle rows={rows} summary={summary} onOpen={() => navigate('/logs')} />
+      <HomeRectangle rows={rows} summary={summary} limits={limits} onOpen={() => navigate('/logs')} />
 
       {status === 'loading' && <p className="muted content">Loading...</p>}
 
@@ -50,8 +50,11 @@ export default function Home({ summary, status, busy, onLog, rows }) {
             pet={pet}
             busy={busy}
             now={now}
+            limits={limits}
             onLog={onLog}
-            onView={() => navigate(`/pets/${pet.id}`)}
+            // PetCard hands back the pet it rendered, so the link goes to that
+            // pet's own page instead of the whole Pets list.
+            onView={(picked) => navigate(`/pets/${picked.id}`)}
           />
         ))}
       </section>
