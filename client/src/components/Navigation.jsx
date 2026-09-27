@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 // The top bar. Same plain CSS approach as the rest of the app.
@@ -13,6 +14,12 @@ const PAGES = [
 ]
 
 export default function Navigation() {
+  const [open, setOpen] = useState(false)
+
+  function handleToggle() {
+    setOpen((current) => !current)
+  }
+
   return (
     <nav className="nav">
       {/* Two spans so the brand can be two colours without an image. */}
@@ -20,7 +27,20 @@ export default function Navigation() {
         <span className="brand-a">Care</span><span className="brand-b">Pawnion</span>
       </p>
 
-      <ul className="nav-links">
+      {/* Only shown on small screens, by CSS. */}
+      <button
+        type="button"
+        className="nav-toggle"
+        aria-expanded={open}
+        aria-label="Toggle menu"
+        onClick={handleToggle}
+      >
+        <span className="nav-toggle-bar" />
+        <span className="nav-toggle-bar" />
+        <span className="nav-toggle-bar" />
+      </button>
+
+      <ul className={`nav-links${open ? ' open' : ''}`}>
         {PAGES.map((page) => (
           <li key={page.to}>
             {/* end on Home, or "/" would count as active on every page. */}
@@ -28,6 +48,7 @@ export default function Navigation() {
               to={page.to}
               end={page.to === '/'}
               className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              onClick={() => setOpen(false)}
             >
               {page.label}
             </NavLink>
