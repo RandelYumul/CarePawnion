@@ -1,127 +1,782 @@
-/* Deliberately plain. Module 3 covered styling in React properly: CSS modules,
-   Tailwind, styled-components, a component library. Replace this with whichever
-   you chose and can defend. */
+/* ========== Base start ========== */
 
+/* The five colours. Every colour in this file comes from one of these.
+   Change one here and it updates on every screen. */
 :root {
-  color-scheme: light dark;
-  --bg: #fbfbfd;
-  --fg: #1a1a1f;
-  --muted: #5c5c6b;
-  --line: #dcdce6;
-  --card: #ffffff;
-  --accent: #4a3f8f;
-  --warn-bg: #fff6dd;
-  --warn-line: #e0bf6a;
-  --error-bg: #fdeaea;
-  --error-line: #d98a8a;
+  --color-primary: #5f6448; 
+  --color-accent: #c0392b;   
+  --color-bg: #F9F2EC;       
+  --color-surface: #FFFCF8;   
+  --color-text: #232a2c;      
+
+  --display: "Playfair Display", Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14141a;
-    --fg: #ececf2;
-    --muted: #a0a0b0;
-    --line: #33333f;
-    --card: #1d1d25;
-    --accent: #a99cf0;
-    --warn-bg: #3a3320;
-    --warn-line: #7d6a30;
-    --error-bg: #3a2323;
-    --error-line: #7d4040;
-  }
+* { 
+  box-sizing: border-box; 
+  font-family: var(--display); 
 }
-
-* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
+  color: var(--color-text);
+  background: var(--color-surface);
   font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-.page { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
 
-h1 { margin: 0 0 .25rem; font-size: 1.9rem; }
-h2 { margin: 0 0 .75rem; font-size: 1.15rem; }
-h3 { margin: 0; font-size: 1.05rem; }
-
-.lede, .muted { color: var(--muted); }
-.lede { margin-top: 0; }
-
-.demo-notice {
-  background: var(--warn-bg);
-  border: 1px solid var(--warn-line);
-  border-radius: .5rem;
-  padding: .9rem 1rem;
-  margin: 1.5rem 0;
+.brand-a { 
+  color: var(--color-text); 
 }
-
-.error {
-  background: var(--error-bg);
-  border: 1px solid var(--error-line);
-  border-radius: .5rem;
-  padding: .75rem 1rem;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: .5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-form.card { display: flex; flex-direction: column; gap: .35rem; }
-
-label { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
-
-input, textarea {
-  font: inherit;
-  color: inherit;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: .35rem;
-  padding: .5rem .6rem;
+.brand-b { 
+  color: var(--color-primary); 
 }
 
 button {
   font: inherit;
   cursor: pointer;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #fff;
-  border-radius: .35rem;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: .4rem;
   padding: .45rem .9rem;
-  margin-top: .75rem;
-  align-self: flex-start;
 }
 
-button:disabled { opacity: .6; cursor: default; }
+button:disabled { 
+  opacity: .6; 
+  cursor: default; 
+}
 
-/* Never remove a focus outline without replacing it. Keyboard users need to
-   see where they are, and it is checked. */
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { 
+  outline: 2px solid var(--color-primary); 
+  outline-offset: 2px; 
+}
+
+/* ========== Base end ========== */
+
+
+/* ========== Page layout start ========== */
+
+html, body, #root { 
+  height: 100%; 
+}
+
+.page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== Page layout end ========== */
+
+
+/* ========== Navigation start ========== */
+
+.nav {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-bg);
+  padding: 1rem 4rem;
+  background-color: var(--color-bg);
+}
+
+.brand {
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 600;
+}
+
+.nav-links { 
+  display: flex; 
+  justify-content: space-around; 
+  list-style: none; 
+  margin: 0; 
+  padding: 0; 
+  width: 25%;
+}
+
+.nav-link {
+  display: inline-block;
+  text-decoration: none;
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid transparent;
+  border-radius: .4rem;
+  padding: .3rem .7rem;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.nav-link:hover { 
+  border: 2px solid var(--color-primary); 
+  color: var(--color-primary);
+}
+
+.nav-link.active { 
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary); 
+}
+
+/* ========== Navigation end ========== */
+
+
+/* ========== Masthead start ========== */
+
+.masthead {
+  border-bottom: 1px solid var(--color-bg);
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-bg) 55%,
+    var(--color-primary) 100%
+  );
+  height: 30vh;
+}
+
+.masthead-body {
+  margin: 0 auto;
+  width: 70%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.masthead-text { 
+  margin: 0;
+  gap: 0;
+  padding: 0;
+}
+
+.masthead-care {
+  margin: 0;
+  line-height: 1;
+}
+
+.masthead-care span { 
+  font-size: 10rem; 
+}
+
+.masthead-text .lede {
+  margin: 0;
+  font-size: 1.5rem; 
+}
+
+.masthead-art {
+  flex: 1.4;
+  min-width: 0;
+  max-height: 100%;
+  object-fit: contain;
+  align-self: flex-end;
+}
+
+@media (max-width: 48rem) {
+  .masthead-body { 
+    flex-direction: column; 
+    width: 88%; 
+    gap: 1rem; 
+  }
+  .masthead-art { 
+    flex: none; 
+    max-width: 80%; 
+  }
+}
+
+/* ========== Masthead end ========== */
+
+/* ========== Home Rectangle start ========== */
+
+.home_rectangle {
+  position: sticky;
+  bottom: 0;
+  width: 90%;
+  min-height: 10rem;      
+  background-color: var(--color-bg);
+  transform: translateY(-50%);
+  margin: 0 auto;
+  border: 1px solid var(--color-primary);
+  border-radius: 2rem;
+  /* The shadow is the text colour made see-through, so no new colour. */
+  box-shadow: 0 4px 12px var(--color-primary);
+  padding: 1rem 2rem .75rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;               
+}
+
+.hr-top {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hr-clock {
+  padding-right: 1.5rem;
+  border-right: 2px solid var(--color-primary);
+  font-family: var(--display);
+  line-height: 1.2;
+}
+
+.hr-clock p { 
+  margin: 0; 
+}
+.hr-clock { 
+  min-width: 10rem; 
+}   /* keeps the buttons still when the text changes */
+.hr-date { 
+  font-size: 1.1rem; 
+  color: var(--color-primary); 
+}
+.hr-time { 
+  font-size: 2.2rem; 
+}
+.hr-ago { 
+  font-family: system-ui, sans-serif; 
+  font-size: .85rem; 
+  color: var(--color-primary); 
+  font-weight: 600; 
+}
+
+.hr-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.hr-shortcut {
+  position: relative;          /* so the badge sits on the corner */
+  width: 4.5rem;
+  height: 3.5rem;
+  background: transparent;
+  color: var(--color-text);
+  border: 2px solid var(--color-primary);
+  border-radius: .8rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0;
+}
+
+/* Surface, not bg, since the bar itself is already bg. */
+.hr-shortcut:hover { background: var(--color-surface); }
+
+.hr-badge {
+  position: absolute;
+  top: -.55rem;
+  right: -.55rem;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 .3rem;
+  border-radius: 1rem;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-size: .75rem;
+  display: grid;
+  place-items: center;
+}
+
+.hr-last {
+  margin: .6rem 0 0;
+  padding-top: .5rem;
+  border-top: 1px solid var(--color-primary);
+  font-size: .9rem;
+  color: var(--color-primary);
+  text-align: right;
+}
+
+.hr-shortcut.active {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+ 
+.hr-shortcut.active:hover { background: var(--color-primary); }
+ 
+.hr-last .pet-link { margin-left: .5rem; padding: 0; }
+
+@media (max-width: 48rem) {
+  .hr-top { flex-direction: column; align-items: stretch; }
+  .hr-clock { border-right: none; border-bottom: 2px solid var(--color-primary); padding: 0 0 .5rem; }
+  .hr-shortcuts { margin-left: 0; justify-content: space-between; }
+  .hr-last { text-align: left; }
+}
+
+/* ========== Home Rectangle end ========== */
+
+/* ========== Pet grid start ========== */
+
+/* At most 3 per row. Each column is a third of the row (minus the 2 gaps),
+   but never under 15rem, so small screens drop to 2 then 1 by themselves.
+   auto-fill, not auto-fit, so 1 or 2 pets do not stretch to full width. */
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(10rem, calc((100% - 4rem) / 4)), 1fr));
+  gap: 1rem;
+  margin: 1.5rem auto;
+  width: 90%;
+  height: 60%;
+}
+
+/* ========== Pet grid end ========== */
+
+
+/* ========== Pet card start ========== */
+
+.pet-card {
+  background: var(--color-bg);
+  border-radius: .9rem;
+  overflow: hidden;              /* clips the photo to the rounded corners */
+  box-shadow: 1px 2px 3px var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pet-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+/* Surface, so the empty photo still stands out from the bg card. */
+.pet-photo-empty {
+  display: grid;
+  place-items: center;
+  font-size: 2.5rem;
+  background: var(--color-surface);
+}
+
+.pet-body {
+  padding: 1rem 3rem;
+  width: 100%;
+}
+
+.pet-name {
+  margin: 0 0 .4rem;
+  font-size: 1.35rem;
+}
+
+.pet-meta {
+  margin: 0 0 .9rem;
+  font-size: 1rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .1rem .4rem;
+}
+
+.pet-meta dt { color: var(--color-text); }
+.pet-meta dt::after { content: ":"; }
+.pet-meta dd { margin: 0; }
+
+.pet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+.chip {
+  border: none;
+  border-radius: 1.5rem;
+  color: var(--color-surface);
+  font-size: .9rem;
+  padding: .45rem 1.1rem;
+  cursor: pointer;
+}
+
+/* Red means due, green means done within the limit in format.js. */
+.chip-due { background: var(--color-accent); }
+.chip-ok { background: var(--color-primary); }
+
+.chip:hover { filter: brightness(.92); }
+.chip:disabled { opacity: .6; cursor: default; }
+
+.pet-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: .85rem;
+  padding: .45rem 0;
+  margin-left: auto;           
+  cursor: pointer;
+}
+
+.pet-link:hover { text-decoration: underline; }
+
+/* ========== Pet card end ========== */
+
+
+/* ========== Content start ========== */
+
+.content {
+  width: 90%;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.75rem 0 .75rem;
+}
+
+.page-head h1 { 
+  margin: 0; 
+}
+
+.section-head { 
+  margin: 2rem 0 .75rem; 
+}
+
+/* ========== Content end ========== */
+
+
+/* ========== Buttons and forms start ========== */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-bg);
+  border-radius: .7rem;
+  padding: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.form .fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: .75rem;
+}
+
+.field { display: flex; flex-direction: column; gap: .25rem; margin: 0 0 .75rem; }
+.fields .field { margin-bottom: 0; }
+
+label { font-size: .82rem; color: var(--color-primary); }
+
+/* Primary border, not bg, or the box disappears on the surface colour. */
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: .4rem;
+  padding: .5rem .6rem;
+  width: 100%;
+}
+
+textarea { resize: vertical; }
+
+.actions { display: flex; gap: .5rem; margin: .25rem 0 0; }
+
+button.ghost {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-bg);
+  padding: .3rem .6rem;
+  font-size: .85rem;
+}
+
+button.ghost:hover { background: var(--color-bg); }
+button.ghost.danger { color: var(--color-accent); }
+button.ghost.danger:hover { background: var(--color-bg); }
+
+/* ========== Buttons and forms end ========== */
+
+
+/* ========== Error start ========== */
+
+.error {
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  border-radius: .6rem;
+  padding: .75rem 1rem;
+  width: 90%;
+  margin: 1.5rem auto 0;
+}
+
+/* ========== Error end ========== */
+
+
+/* ========== Pets page start ========== */
+
+/* Two pets per row, one on small screens. minmax(0, 1fr) so a long name
+   cannot push a column wider than the other. */
+.pet-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 40rem) {
+  .pet-list { grid-template-columns: 1fr; }
+}
+
+.pet-item { border-top: 3px solid var(--color-primary); margin-bottom: 0; }
+.pet-item .species { margin: .1rem 0 .75rem; font-size: .85rem; color: var(--color-primary); }
+
+.pet-item dl { margin: 0; display: grid; gap: .1rem; }
+.pet-item dt { font-size: .78rem; color: var(--color-primary); }
+.pet-item dd { margin: 0 0 .6rem; font-size: .9rem; }
+.pet-item .ghost { margin-top: .25rem; }
+
+.by { color: var(--color-primary); }
+
+/* 4 / 3, not square, or two columns of photos fill the whole screen. */
+.pet-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: .5rem;
+  margin-bottom: .6rem;
+}
+
+.photo-preview {
+  width: 8rem;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: .5rem;
+  margin-top: .75rem;
+  display: block;
+}
+
+.pet-title-link { color: inherit; text-decoration: none; }
+.pet-title-link:hover { text-decoration: underline; }
+
+.pet-item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: .25rem;
+}
+
+.pet-item-actions .pet-link { margin-left: 0; text-decoration: none; }
+
+.field-error { font-size: .82rem; color: var(--color-accent); }
+
+/* The shared input rule gives file inputs a box that looks broken. */
+input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
+
+/* ========== Pets page end ========== */
+
+
+/* ========== Pet detail page start ========== */
+
+.back-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  color: var(--color-primary);
+  font-size: .9rem;
+  text-decoration: none;
+}
+
+.back-link:hover { text-decoration: underline; }
+
+/* The first box. Photo on the left, info on the right. */
+.pet-profile {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-top: .75rem;
+  background: var(--color-bg);
+  border: none;
+}
+
+.pet-profile-photo {
+  flex: none;
+  width: 16rem;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: .7rem;
+}
+
+.pet-profile-info { flex: 1; min-width: 0; }
+.pet-profile-info h1 { margin-bottom: .25rem; }
+.pet-profile-info .detail-list { grid-template-columns: 8rem 1fr; }
+
+@media (max-width: 40rem) {
+  .pet-profile { flex-direction: column; }
+  .pet-profile-photo { width: 100%; }
+}
+
+/* ========== Pet detail page end ========== */
+
+
+/* ========== Logs page start ========== */
+
+.detail { border-color: var(--color-primary); }
+.detail-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.detail-head h2 { margin: 0; }
+
+.detail-list {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: .3rem .75rem;
+  margin: .75rem 0 0;
+  font-size: .9rem;
+}
+
+.detail-list dt { color: var(--color-primary); }
+.detail-list dd { margin: 0; overflow-wrap: anywhere; }
 
 .list { list-style: none; padding: 0; margin: 0; }
 
+.row.editing { border-color: var(--color-primary); background: var(--color-bg); }
+
 .row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
 
-.spooky { color: var(--accent); letter-spacing: .15em; }
+.note { margin: .5rem 0 0; overflow-wrap: anywhere; }
+
+/* One style for all four activities. The label says which one it is,
+   so the tag-fed, tag-walk, tag-pee and tag-poop classes need no colour. */
+.tag {
+  font-size: .75rem;
+  padding: .12rem .5rem;
+  border-radius: 1rem;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  white-space: nowrap;
+}
 
 .card footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-top: .5rem;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  margin-top: .75rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--color-bg);
   font-size: .85rem;
-  color: var(--muted);
+  color: var(--color-primary);
 }
 
-.card footer button {
-  margin-top: 0;
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--line);
+.row-buttons { display: flex; gap: .4rem; }
+
+code { font-size: .85em; }
+
+.type-picks {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .9rem;
+  align-content: flex-start;
 }
+ 
+.type-picks legend {
+  font-size: .82rem;
+  color: var(--color-primary);
+  padding: 0;
+  margin-bottom: .25rem;
+}
+ 
+.type-pick {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .95rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+ 
+/* The shared input rule sets width 100%, which stretches checkboxes. */
+.type-pick input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+/* ========== Logs page end ========== */
+
+
+/* ========== Demo notice start ========== */
+
+.demo-notice {
+  background: var(--color-bg);
+  border: 1px solid var(--color-primary);
+  border-radius: .6rem;
+  padding: .9rem 1rem;
+  margin: 1.5rem 0;
+}
+
+/* ========== Demo notice end ========== */
+
+
+/* ========== Footer start ========== */
+
+.site-footer {
+  margin-top: auto;  
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.footer-inner {
+  max-width: 90%;          
+  margin: 0 auto;
+  min-height: 5rem;   
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem 1.5rem;
+  font-size: 1.5rem;
+}
+
+.footer-brand { margin: 0; }
+
+/* bg on primary is 5.6 : 1, so the softer text still passes contrast. */
+.site-footer .muted { color: var(--color-bg); }
+
+.footer-links { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+
+.footer-links a {
+  color: var(--color-surface);
+  text-decoration: none;
+  padding: .15rem 0;
+}
+
+.footer-links a:hover { text-decoration: underline; }
+
+.site-footer :focus-visible { outline-color: var(--color-surface); }
+
+.footer-fine { flex-basis: 100%; margin: 0; font-size: .8rem; }
+
+
+@media (max-width: 30rem) {
+  .footer-inner { flex-direction: column; align-items: stretch; }
+}
+
+/* ========== Footer end ========== */
+
+/* Hidden above the screen until Tab reaches it. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  padding: .5rem 1rem;
+  border-radius: .4rem;
+  text-decoration: none;
+}
+
+.skip-link:focus { top: 1rem; }
+
+/* main only gets focus from the skip link, so no outline box around the whole screen. */
+.page-body:focus { outline: none; }

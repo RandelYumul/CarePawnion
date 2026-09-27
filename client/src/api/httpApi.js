@@ -26,15 +26,23 @@ async function request(path, options) {
   return response.status === 204 ? null : response.json()
 }
 
-export const listSightings = () => request('/api/sightings')
+export const listLogs = () => request('/api/logs')
 
-export const getSighting = (id) => request(`/api/sightings/${id}`)
+export const getLog = (id) => request(`/api/logs/${id}`)
 
-export const createSighting = (input) =>
-  request('/api/sightings', { method: 'POST', body: JSON.stringify(input) })
+export const createLog = (input) =>
+  request('/api/logs', { method: 'POST', body: JSON.stringify(input) })
 
-export const updateSighting = (id, input) =>
-  request(`/api/sightings/${id}`, { method: 'PUT', body: JSON.stringify(input) })
+export const updateLog = (id, input) =>
+  request(`/api/logs/${id}`, { method: 'PUT', body: JSON.stringify(input) })
 
-export const deleteSighting = (id) =>
-  request(`/api/sightings/${id}`, { method: 'DELETE' })
+export const deleteLog = (id) =>
+  request(`/api/logs/${id}`, { method: 'DELETE' })
+
+export const listPets = () => request('/api/pets')
+
+export const createPet = (input) =>
+  request('/api/pets', { method: 'POST', body: JSON.stringify(input) })
+
+export const deletePet = (id) =>
+  request(`/api/pets/${id}`, { method: 'DELETE' })
