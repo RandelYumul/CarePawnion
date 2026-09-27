@@ -54,7 +54,6 @@ h1, h2, h3, p, dd, li {
   color: var(--color-primary);
 }
 
-/* Used on empty states and secondary lines all over the app. */
 .muted {
   color: var(--color-primary);
 }
@@ -67,7 +66,6 @@ button {
   color: var(--color-surface);
   border-radius: .4rem;
   padding: .45rem .9rem;
-  /* A finger needs a bigger target than a mouse pointer does. */
   min-height: 2.75rem;
 }
 
@@ -94,7 +92,6 @@ html, body, #root {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  /* A stray wide child cannot make the whole document scroll sideways. */
   overflow-x: hidden;
 }
 
@@ -118,16 +115,9 @@ html, body, #root {
   gap: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--color-bg);
   background-color: var(--color-bg);
-  /* Same centered column as .content and .footer-inner: whichever is bigger
-     of the gutter or "half of whatever space is left outside max-width".
-     This is what actually lines the brand up with the page content below
-     it on a wide screen, instead of the old fixed gutter drifting apart
-     from the centered content as the screen gets wider. */
   padding: var(--space-4) max(var(--gutter), calc((100% - var(--max-width)) / 2));
 }
 
-/* Grows with the screen and stops at a normal heading size, not a full-width
-   banner size. */
 .brand {
   margin: 0;
   font-size: clamp(1.25rem, 3.2vw, 1.85rem);
@@ -152,8 +142,6 @@ html, body, #root {
   border: 2px solid transparent;
   border-radius: .4rem;
   padding: .3rem .7rem;
-  /* Ordinary link size, not shrinking below readable or growing past the
-     brand next to it. */
   font-size: clamp(.95rem, 1.4vw, 1.1rem);
   font-weight: bold;
 }
@@ -168,7 +156,6 @@ html, body, #root {
   border-color: var(--color-primary);
 }
 
-/* Hidden on a normal screen. Shown only under the 48rem breakpoint below. */
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -771,20 +758,22 @@ button.ghost.danger:hover { background: var(--color-bg); }
 
 /* ========== Pets page start ========== */
 
-/* Two pets per row, one on a phone. minmax(0, 1fr) so a long name cannot
-   push a column wider than the other. */
+/* Same sizing as the home pet grid, so a card is the same width on both
+   pages. Three per row on a wide screen, then 2, then 1. */
 .pet-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(max(16rem, calc((100% - 2 * var(--space-4)) / 3)), 1fr));
   gap: var(--space-4);
   margin: var(--space-4) 0;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 30rem) {
   .pet-list { grid-template-columns: 1fr; }
 }
 
 .pet-item { border-top: 3px solid var(--color-primary); margin-bottom: 0; }
+/* Same 1.15rem name as the home card, or the title dwarfs the card. */
+.pet-item h2 { margin: 0; font-size: 1.15rem; }
 .pet-item .species { margin: .1rem 0 var(--space-3); font-size: .85rem; color: var(--color-primary); }
 
 .pet-item dl { margin: 0; display: grid; gap: .1rem; }
@@ -794,10 +783,12 @@ button.ghost.danger:hover { background: var(--color-bg); }
 
 .by { color: var(--color-primary); }
 
-/* 4 / 3, not square, or two columns of photos fill the whole screen. */
+/* 4 / 3 with the same 13rem cap as the home card photo, or a wide column
+   makes the photo taller than everything under it. */
 .pet-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
+  max-height: 13rem;
   object-fit: cover;
   border-radius: .5rem;
   margin-bottom: var(--space-2);
@@ -1099,3 +1090,102 @@ code { font-size: .85em; overflow-wrap: anywhere; }
 }
 
 /* ========== Motion end ========== */
+/* ========== Logs stats and history start ========== */
+ 
+.stat-line {
+  margin: 0 0 var(--space-3);
+  color: var(--color-primary);
+}
+ 
+.stat-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin-bottom: var(--space-6);
+}
+ 
+.stat-card {
+  border-top: 3px solid var(--color-primary);
+  margin-bottom: 0;
+}
+ 
+.stat-card h3 { margin: 0 0 var(--space-2); }
+ 
+.stat-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  font-size: .9rem;
+}
+ 
+.stat-list dt { color: var(--color-primary); }
+.stat-list dd { margin: 0; font-weight: 600; }
+ 
+/* Red only repeats what the words already say, it is not the only signal. */
+.stat-due { color: var(--color-accent); }
+.stat-ok { color: var(--color-primary); }
+ 
+.stat-today {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-bg);
+  font-size: .85rem;
+  color: var(--color-primary);
+}
+ 
+.day-group { padding-bottom: var(--space-2); }
+ 
+.day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-bg);
+}
+ 
+.day-head h3 { margin: 0; }
+.day-head .muted { font-size: .85rem; }
+ 
+.day-rows { display: grid; }
+ 
+/* One line per log. The buttons sit at the end, so the eye can run down the
+   times and the pet names without stepping over them. */
+.log-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-bg);
+  font-size: .9rem;
+}
+ 
+.log-row:last-child { border-bottom: none; }
+.log-row.editing { background: var(--color-bg); }
+ 
+.log-time {
+  min-width: 5rem;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+ 
+.log-pet { font-weight: 600; }
+.log-member { color: var(--color-primary); }
+ 
+.log-note {
+  flex: 1 1 12rem;
+  min-width: 0;
+  color: var(--color-primary);
+  overflow-wrap: anywhere;
+}
+ 
+.log-row .row-buttons { margin-left: auto; }
+ 
+@media (max-width: 40rem) {
+  .log-row .row-buttons { margin-left: 0; width: 100%; }
+}
+ 
+/* ========== Logs stats and history end ========== */

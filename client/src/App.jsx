@@ -186,6 +186,7 @@ export default function App() {
                 slow={slow}
                 rows={rows}
                 pets={pets}
+                summary={summary}
                 onSave={handleSave}
                 onView={handleView}
                 onDelete={handleDelete}

@@ -60,3 +60,23 @@ export function isDue(iso, hours, now = new Date()) {
   if (!iso) return true
   return now - new Date(iso) > hours * 60 * 60 * 1000
 }
+
+// Just the time, since the day is already the heading above the row.
+export function formatTime(iso) {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return 'Unknown time'
+  return date.toLocaleTimeString([], { timeStyle: 'short' })
+}
+
+// "Today", "Yesterday", or a plain date. Used to group the log list by day.
+export function dayLabel(iso, now = new Date()) {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return 'Unknown day'
+
+  const startOf = (value) => new Date(value.getFullYear(), value.getMonth(), value.getDate())
+  const days = Math.round((startOf(now) - startOf(date)) / 86400000)
+
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  return date.toLocaleDateString([], { dateStyle: 'medium' })
+}

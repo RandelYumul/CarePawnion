@@ -51,7 +51,7 @@ export default function Home({ summary, status, busy, onLog, rows }) {
             busy={busy}
             now={now}
             onLog={onLog}
-            onView={() => navigate('/pets')}
+            onView={() => navigate(`/pets/${pet.id}`)}
           />
         ))}
       </section>

@@ -86,7 +86,6 @@ export default function HomeRectangle({ rows, summary, onOpen }) {
           </p>
           <p className="hr-ago">{last ? timeAgo(last.happened_at, now) : 'Nothing yet'}</p>
 
-          
         </div>
 
         <div className="hr-due">

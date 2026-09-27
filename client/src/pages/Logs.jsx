@@ -1,24 +1,53 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { TYPES, labelOf, formatWhen } from '../format.js'
+import {
+  TYPES, LIMITS, labelOf, formatWhen, formatTime, timeAgo, dayLabel, isDue,
+} from '../format.js'
 
-// The Logs page. The log form, one log loaded on its own, and everything
-// logged so far.
+// The Logs page. A short status board on top, the log form behind a button,
+// one log loaded on its own, and the history grouped by day.
 //
-// App owns the rows and talks to the API. This page owns the form and the
-// detail panel. onSave, onView and onDelete hand the work back to App.
+// App owns the rows and talks to the API. This page owns the form, whether
+// the form is open, and the detail panel. onSave, onView and onDelete hand
+// the work back to App.
 
 // types is a list, so one submit can log pee and poop at the same time.
 // Each checked type still becomes its own log, since a log has one type.
 const EMPTY_FORM = { pet: '', types: ['fed'], member: '', note: '' }
 
-export default function Logs({ status, slow, rows, pets, onSave, onView, onDelete }) {
+// Same day as now, used for the counts on the status board.
+function isToday(iso, now) {
+  const date = new Date(iso)
+  return date.getFullYear() === now.getFullYear()
+    && date.getMonth() === now.getMonth()
+    && date.getDate() === now.getDate()
+}
+
+// rows arrive newest first, so walking them in order already gives the days
+// in order. A new label starts a new group, otherwise the row joins the last.
+function groupByDay(rows, now) {
+  const groups = []
+  for (const row of rows) {
+    const label = dayLabel(row.happened_at, now)
+    const last = groups[groups.length - 1]
+    if (last && last.label === label) last.rows.push(row)
+    else groups.push({ label, rows: [row] })
+  }
+  return groups
+}
+
+export default function Logs({ status, slow, rows, pets, summary, onSave, onView, onDelete }) {
   const [form, setForm] = useState(EMPTY_FORM)
+  const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
 
   const [detail, setDetail] = useState(null)
   const [detailStatus, setDetailStatus] = useState('idle')  // idle | loading | ready
+
+  const now = new Date()
+  const groups = groupByDay(rows, now)
+  const today = rows.filter((row) => isToday(row.happened_at, now))
 
   // Editing changes one log, so only one type can be checked there.
   function toggleType(value) {
@@ -53,6 +82,7 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
       if (detail?.id === editingId) setDetail(saved)
       setEditingId(null)
       setForm(EMPTY_FORM)
+      setShowForm(false)
       return
     }
 
@@ -73,11 +103,13 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
 
     // Keep the pet and the member, since the next log is usually the same person.
     setForm({ ...EMPTY_FORM, pet: form.pet, member: form.member })
+    setShowForm(false)
   }
 
   function startEdit(row) {
     setEditingId(row.id)
     setForm({ pet: row.pet, types: [row.type], member: row.member, note: row.note ?? '' })
+    setShowForm(true)
     // The form is at the top and the row can be far down the list.
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -85,6 +117,7 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
   function cancelEdit() {
     setEditingId(null)
     setForm(EMPTY_FORM)
+    setShowForm(false)
   }
 
   // getLog exists so a detail page can load one row without the whole list.
@@ -113,6 +146,11 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
     <section className="content">
       <div className="page-head">
         <h1>Logs</h1>
+        {pets.length > 0 && !editingId && (
+          <button className="ghost" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : 'Log care'}
+          </button>
+        )}
       </div>
 
       {status === 'ready' && pets.length === 0 && (
@@ -121,7 +159,52 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
         </p>
       )}
 
-      {pets.length > 0 && (
+      {/* The numbers people actually come here for. The list below is the
+          proof, this is the answer. */}
+      {status === 'ready' && summary.length > 0 && (
+        <>
+          <p className="stat-line">
+            {today.length === 0
+              ? 'Nothing logged today yet.'
+              : `${today.length} log${today.length === 1 ? '' : 's'} today, ${rows.length} in total.`}
+          </p>
+
+          <div className="stat-grid">
+            {summary.map((pet) => {
+              const fedToday = today.filter((row) => row.pet === pet.name && row.type === 'fed').length
+              const outToday = today.filter((row) => row.pet === pet.name && row.type !== 'fed').length
+              const fedDue = isDue(pet.lastFed?.happened_at, LIMITS.fed, now)
+              const outDue = isDue(pet.lastOut?.happened_at, LIMITS.out, now)
+
+              return (
+                <article key={pet.id} className="card stat-card">
+                  <h3>{pet.name}</h3>
+
+                  <dl className="stat-list">
+                    <dt>Last fed</dt>
+                    <dd className={fedDue ? 'stat-due' : 'stat-ok'}>
+                      {pet.lastFed ? timeAgo(pet.lastFed.happened_at, now) : 'No record yet'}
+                    </dd>
+                    <dt>Last out</dt>
+                    <dd className={outDue ? 'stat-due' : 'stat-ok'}>
+                      {pet.lastOut ? timeAgo(pet.lastOut.happened_at, now) : 'No record yet'}
+                    </dd>
+                  </dl>
+
+                  <p className="stat-today">
+                    Today, fed {fedToday} time{fedToday === 1 ? '' : 's'} and
+                    {' '}out {outToday} time{outToday === 1 ? '' : 's'}.
+                  </p>
+                </article>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* The form only opens when someone is logging, so the page starts on
+          the numbers and not on empty fields. */}
+      {pets.length > 0 && showForm && (
         <form onSubmit={handleSubmit} className="card form">
           <h2>{editingId ? 'Edit log' : 'Log care'}</h2>
 
@@ -187,9 +270,7 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
                   ? 'Save changes'
                   : form.types.length > 1 ? `Add ${form.types.length} logs` : 'Add log'}
             </button>
-            {editingId && (
-              <button type="button" className="ghost" onClick={cancelEdit}>Cancel</button>
-            )}
+            <button type="button" className="ghost" onClick={cancelEdit}>Cancel</button>
           </p>
         </form>
       )}
@@ -217,7 +298,7 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
         </section>
       )}
 
-      <h2 className="section-head">Everything logged</h2>
+      <h2 className="section-head">History</h2>
 
       {status === 'loading' && (
         <p className="muted">
@@ -226,36 +307,42 @@ export default function Logs({ status, slow, rows, pets, onSave, onView, onDelet
       )}
 
       {status === 'ready' && rows.length === 0 && (
-        <p className="muted">Nothing logged yet. Add the first one above.</p>
+        <p className="muted">Nothing logged yet. Use the Log care button above.</p>
       )}
 
-      {status === 'ready' && rows.length > 0 && (
-        <ul className="list">
-          {rows.map((row) => (
-            <li key={row.id} className={`card row${editingId === row.id ? ' editing' : ''}`}>
-              <div className="row-head">
-                <h3>{row.pet}</h3>
-                <span className={`tag tag-${row.type}`}>{labelOf(row.type)}</span>
-              </div>
+      {/* One card per day instead of one card per log. A day is what people
+          scan for, and the rows inside stay one line each. */}
+      {status === 'ready' && rows.length > 0 && groups.map((group) => (
+        <section key={group.label} className="card day-group">
+          <div className="day-head">
+            <h3>{group.label}</h3>
+            <span className="muted">{group.rows.length} log{group.rows.length === 1 ? '' : 's'}</span>
+          </div>
 
-              {row.note
-                ? <p className="note">{row.note}</p>
-                : <p className="muted note">No note given.</p>}
-
-              <footer>
-                <time dateTime={row.happened_at}>
-                  {formatWhen(row.happened_at)} by {row.member}
+          <ul className="list day-rows">
+            {group.rows.map((row) => (
+              <li key={row.id} className={`log-row${editingId === row.id ? ' editing' : ''}`}>
+                <time className="log-time" dateTime={row.happened_at}>
+                  {formatTime(row.happened_at)}
                 </time>
+
+                <span className={`tag tag-${row.type}`}>{labelOf(row.type)}</span>
+
+                <span className="log-pet">{row.pet}</span>
+                <span className="log-member">by {row.member}</span>
+
+                {row.note && <span className="log-note">{row.note}</span>}
+
                 <span className="row-buttons">
                   <button className="ghost" onClick={() => handleView(row.id)}>View</button>
                   <button className="ghost" onClick={() => startEdit(row)}>Edit</button>
                   <button className="ghost danger" onClick={() => handleDelete(row.id)}>Delete</button>
                 </span>
-              </footer>
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
     </section>
   )
 }
