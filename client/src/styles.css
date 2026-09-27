@@ -3,33 +3,65 @@
 /* The five colours. Every colour in this file comes from one of these.
    Change one here and it updates on every screen. */
 :root {
-  --color-primary: #5f6448; 
-  --color-accent: #c0392b;   
-  --color-bg: #F9F2EC;       
-  --color-surface: #FFFCF8;   
-  --color-text: #232a2c;      
+  --color-primary: #5f6448;
+  --color-accent: #c0392b;
+  --color-bg: #F9F2EC;
+  --color-surface: #FFFCF8;
+  --color-text: #232a2c;
 
   --display: "Playfair Display", Georgia, serif;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Must stay a fixed length, not a %. min(90%, var(--max-width)) below
+     only caps the width on a wide screen if this is a real length. */
+  --max-width: 75rem;
+
+  --gutter: clamp(1rem, 5vw, 4rem);
 }
 
-* { 
-  box-sizing: border-box; 
-  font-family: var(--display); 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   color: var(--color-text);
   background: var(--color-surface);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 16px/1.6 var(--body);
 }
 
-
-.brand-a { 
-  color: var(--color-text); 
+h1, h2, h3, .brand, .masthead-care, .hr-clock {
+  font-family: var(--display);
 }
-.brand-b { 
-  color: var(--color-primary); 
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1, h2, h3, p, dd, li {
+  overflow-wrap: anywhere;
+}
+
+.brand-a {
+  color: var(--color-text);
+}
+.brand-b {
+  color: var(--color-primary);
+}
+
+/* Used on empty states and secondary lines all over the app. */
+.muted {
+  color: var(--color-primary);
 }
 
 button {
@@ -40,16 +72,18 @@ button {
   color: var(--color-surface);
   border-radius: .4rem;
   padding: .45rem .9rem;
+  /* A finger needs a bigger target than a mouse pointer does. */
+  min-height: 2.75rem;
 }
 
-button:disabled { 
-  opacity: .6; 
-  cursor: default; 
+button:disabled {
+  opacity: .6;
+  cursor: default;
 }
 
-:focus-visible { 
-  outline: 2px solid var(--color-primary); 
-  outline-offset: 2px; 
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* ========== Base end ========== */
@@ -57,14 +91,16 @@ button:disabled {
 
 /* ========== Page layout start ========== */
 
-html, body, #root { 
-  height: 100%; 
+html, body, #root {
+  height: 100%;
 }
 
 .page {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  /* A stray wide child cannot make the whole document scroll sideways. */
+  overflow-x: hidden;
 }
 
 .page-body {
@@ -80,27 +116,37 @@ html, body, #root {
 
 .nav {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--color-bg);
-  padding: 1rem 4rem;
   background-color: var(--color-bg);
+  /* Same centered column as .content and .footer-inner: whichever is bigger
+     of the gutter or "half of whatever space is left outside max-width".
+     This is what actually lines the brand up with the page content below
+     it on a wide screen, instead of the old fixed gutter drifting apart
+     from the centered content as the screen gets wider. */
+  padding: var(--space-4) max(var(--gutter), calc((100% - var(--max-width)) / 2));
 }
 
+/* Grows with the screen and stops at a normal heading size, not a full-width
+   banner size. */
 .brand {
   margin: 0;
-  font-size: 4rem;
+  font-size: clamp(1.25rem, 3.2vw, 1.85rem);
   font-weight: 600;
+  line-height: 1.1;
 }
 
-.nav-links { 
-  display: flex; 
-  justify-content: space-around; 
-  list-style: none; 
-  margin: 0; 
-  padding: 0; 
-  width: 25%;
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-link {
@@ -108,21 +154,23 @@ html, body, #root {
   text-decoration: none;
   background: transparent;
   color: var(--color-text);
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: .4rem;
   padding: .3rem .7rem;
-  font-size: 2rem;
+  /* Ordinary link size, not shrinking below readable or growing past the
+     brand next to it. */
+  font-size: clamp(.95rem, 1.4vw, 1.1rem);
   font-weight: bold;
 }
 
-.nav-link:hover { 
-  border: 2px solid var(--color-primary); 
+.nav-link:hover {
+  border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.nav-link.active { 
+.nav-link.active {
   color: var(--color-primary);
-  border: 2px solid var(--color-primary); 
+  border-color: var(--color-primary);
 }
 
 /* ========== Navigation end ========== */
@@ -130,6 +178,8 @@ html, body, #root {
 
 /* ========== Masthead start ========== */
 
+/* No fixed vh height. The masthead is as tall as the words inside it, so
+   nothing spills out when the text wraps on a phone. */
 .masthead {
   border-bottom: 1px solid var(--color-bg);
   background: linear-gradient(
@@ -138,136 +188,152 @@ html, body, #root {
     var(--color-bg) 55%,
     var(--color-primary) 100%
   );
-  height: 30vh;
+  padding: var(--space-8) 0 var(--space-6);
 }
 
 .masthead-body {
+  width: min(90%, var(--max-width));
   margin: 0 auto;
-  width: 70%;
-  height: 100%;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: var(--space-8);
 }
 
-.masthead-text { 
+.masthead-text {
+  flex: 1;
+  min-width: 0;
   margin: 0;
-  gap: 0;
   padding: 0;
+  container-type: inline-size;
 }
 
 .masthead-care {
   margin: 0;
   line-height: 1;
+  white-space: nowrap;
 }
 
-.masthead-care span { 
-  font-size: 10rem; 
+.masthead-care span {
+  font-size: clamp(0.7rem, 16cqw, 5rem);
 }
 
 .masthead-text .lede {
-  margin: 0;
-  font-size: 1.5rem; 
+  margin: var(--space-3) 0 0;
+  font-size: clamp(0.4rem, 1.6vw, 1rem);
 }
 
 .masthead-art {
   flex: 1.4;
   min-width: 0;
-  max-height: 100%;
+  max-height: 22rem;
   object-fit: contain;
   align-self: flex-end;
 }
 
 @media (max-width: 48rem) {
-  .masthead-body { 
-    flex-direction: column; 
-    width: 88%; 
-    gap: 1rem; 
+  .masthead-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
   }
-  .masthead-art { 
-    flex: none; 
-    max-width: 80%; 
+  .masthead-art {
+    flex: none;
+    width: 70%;
+    margin: 0 auto;
+  }
+  .masthead-text {
+    width: 100%;
   }
 }
 
 /* ========== Masthead end ========== */
+
 
 /* ========== Home Rectangle start ========== */
 
 .home_rectangle {
   position: sticky;
   bottom: 0;
-  width: 90%;
-  min-height: 10rem;      
+  width: min(90%, var(--max-width));
   background-color: var(--color-bg);
-  transform: translateY(-50%);
+  transform: translateY(-2rem);
   margin: 0 auto;
   border: 1px solid var(--color-primary);
-  border-radius: 2rem;
-  /* The shadow is the text colour made see-through, so no new colour. */
+  border-radius: 1.5rem;
+  /* The shadow is the primary colour, so no new colour enters the palette. */
   box-shadow: 0 4px 12px var(--color-primary);
-  padding: 1rem 2rem .75rem;
+  padding: var(--space-4) var(--space-6) var(--space-3);
   display: flex;
   flex-direction: column;
-  z-index: 1;               
+  gap: var(--space-2);
+  z-index: 1;
 }
 
+/* Three equal columns. */
 .hr-top {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-6);
 }
 
 .hr-clock {
-  padding-right: 1.5rem;
+  padding-right: var(--space-6);
   border-right: 2px solid var(--color-primary);
-  font-family: var(--display);
   line-height: 1.2;
+  min-width: 0;
 }
 
-.hr-clock p { 
-  margin: 0; 
+.hr-clock p {
+  margin: 0;
 }
-.hr-clock { 
-  min-width: 10rem; 
-}   /* keeps the buttons still when the text changes */
-.hr-date { 
-  font-size: 1.1rem; 
-  color: var(--color-primary); 
+
+.hr-date {
+  font-size: 1.1rem;
+  color: var(--color-primary);
 }
-.hr-time { 
-  font-size: 2.2rem; 
+
+.hr-time {
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
 }
-.hr-ago { 
-  font-family: system-ui, sans-serif; 
-  font-size: .85rem; 
-  color: var(--color-primary); 
-  font-weight: 600; 
+
+.hr-ago {
+  font-family: var(--body);
+  font-size: .85rem;
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .hr-shortcuts {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-left: auto;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .hr-shortcut {
   position: relative;          /* so the badge sits on the corner */
-  width: 4.5rem;
-  height: 3.5rem;
+  width: 4rem;
+  height: 3.25rem;
+  min-height: 0;               /* the shared button rule sets 2.75rem */
   background: transparent;
   color: var(--color-text);
   border: 2px solid var(--color-primary);
   border-radius: .8rem;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: bold;
   padding: 0;
 }
 
 /* Surface, not bg, since the bar itself is already bg. */
 .hr-shortcut:hover { background: var(--color-surface); }
+
+.hr-shortcut.active {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.hr-shortcut.active:hover { background: var(--color-primary); }
 
 .hr-badge {
   position: absolute;
@@ -279,50 +345,163 @@ html, body, #root {
   border-radius: 1rem;
   background: var(--color-accent);
   color: var(--color-surface);
+  font-family: var(--body);
   font-size: .75rem;
   display: grid;
   place-items: center;
 }
 
+/* The hungry and bathroom columns. */
+.hr-due {
+  min-width: 0;                /* so a long pet name cannot widen the column */
+  border-right: 2px solid var(--color-primary);
+  padding-right: var(--space-6);
+}
+
+.hr-due:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.hr-due-head {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hr-due-count {
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 .3rem;
+  border-radius: 1rem;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-family: var(--body);
+  font-size: .75rem;
+  display: grid;
+  place-items: center;
+}
+
+.hr-due-none {
+  margin: 0;
+  font-size: .9rem;
+  color: var(--color-primary);
+}
+
+.hr-due-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hr-due-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.hr-due-photo {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.hr-due-photo-empty {
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  background: var(--color-surface);
+}
+
+.hr-due-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* One line with dots at the end, so "Sir Bartholomew Fluffington III" cannot
+   stretch the column. */
+.hr-due-name {
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-due-ago {
+  font-size: .8rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
 .hr-last {
-  margin: .6rem 0 0;
-  padding-top: .5rem;
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
   border-top: 1px solid var(--color-primary);
   font-size: .9rem;
   color: var(--color-primary);
   text-align: right;
 }
 
-.hr-shortcut.active {
-  background: var(--color-primary);
-  color: var(--color-bg);
-}
- 
-.hr-shortcut.active:hover { background: var(--color-primary); }
- 
-.hr-last .pet-link { margin-left: .5rem; padding: 0; }
+.hr-last .pet-link { margin-left: var(--space-2); padding: 0; }
 
-@media (max-width: 48rem) {
-  .hr-top { flex-direction: column; align-items: stretch; }
-  .hr-clock { border-right: none; border-bottom: 2px solid var(--color-primary); padding: 0 0 .5rem; }
-  .hr-shortcuts { margin-left: 0; justify-content: space-between; }
+/* Tablet. The clock moves above the two lists, which stay side by side. */
+@media (max-width: 64rem) {
+  .hr-top { grid-template-columns: 1fr 1fr; }
+  .hr-clock {
+    grid-column: 1 / -1;
+    border-right: none;
+    border-bottom: 2px solid var(--color-primary);
+    padding: 0 0 var(--space-2);
+    min-width: 0;
+  }
+  .hr-shortcuts { justify-content: space-between; }
+}
+
+/* Phone. Everything in one column. */
+@media (max-width: 40rem) {
+  .home_rectangle {
+    border-radius: 1rem;
+    padding: var(--space-4);
+    transform: none;
+    margin-bottom: var(--space-4);
+  }
+  .hr-top { grid-template-columns: 1fr; }
+  .hr-due {
+    border-right: none;
+    border-bottom: 2px solid var(--color-primary);
+    padding: 0 0 var(--space-3);
+  }
+  .hr-due:last-child { border-bottom: none; padding-bottom: 0; }
   .hr-last { text-align: left; }
 }
 
 /* ========== Home Rectangle end ========== */
 
+
 /* ========== Pet grid start ========== */
 
-/* At most 3 per row. Each column is a third of the row (minus the 2 gaps),
-   but never under 15rem, so small screens drop to 2 then 1 by themselves.
-   auto-fill, not auto-fit, so 1 or 2 pets do not stretch to full width. */
+/* Each column is a third of the row minus the 2 gaps, but never under
+   16rem, so a wide screen still stops at 3 and a narrow one drops itself
+   to 2 then 1. */
 .pet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(max(10rem, calc((100% - 4rem) / 4)), 1fr));
-  gap: 1rem;
-  margin: 1.5rem auto;
-  width: 90%;
-  height: 60%;
+  grid-template-columns: repeat(auto-fill, minmax(max(16rem, calc((100% - 2 * var(--space-4)) / 3)), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) auto;
+  width: min(90%, var(--max-width));
+}
+
+@media (max-width: 30rem) {
+  .pet-grid { grid-template-columns: 1fr; }
 }
 
 /* ========== Pet grid end ========== */
@@ -337,11 +516,10 @@ html, body, #root {
   box-shadow: 1px 2px 3px var(--color-primary);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  min-width: 0;
 }
 
 .pet-photo {
-  display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -355,33 +533,44 @@ html, body, #root {
   background: var(--color-surface);
 }
 
+/* The padding used to be 3rem on the sides, which left almost no room for
+   text once the card dropped to one column. */
 .pet-body {
-  padding: 1rem 3rem;
+  padding: var(--space-4);
   width: 100%;
+  min-width: 0;
 }
 
 .pet-name {
-  margin: 0 0 .4rem;
+  margin: 0 0 var(--space-1);
   font-size: 1.35rem;
 }
 
+/* Two pairs per row on a wide card. The pairs wrap by themselves, so the
+   list never runs off the side. */
 .pet-meta {
-  margin: 0 0 .9rem;
-  font-size: 1rem;
+  margin: 0 0 var(--space-3);
+  font-size: .95rem;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: .1rem .4rem;
+  grid-template-columns: auto 1fr auto 1fr;
+  gap: var(--space-1) var(--space-2);
 }
 
 .pet-meta dt { color: var(--color-text); }
 .pet-meta dt::after { content: ":"; }
-.pet-meta dd { margin: 0; }
+.pet-meta dd { margin: 0; min-width: 0; }
+
+/* One pair per row once the card gets narrow, or the values get squeezed
+   into two or three characters each. */
+@media (max-width: 30rem) {
+  .pet-meta { grid-template-columns: auto 1fr; }
+}
 
 .pet-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .5rem;
+  gap: var(--space-2);
 }
 
 .chip {
@@ -406,7 +595,7 @@ html, body, #root {
   color: var(--color-primary);
   font-size: .85rem;
   padding: .45rem 0;
-  margin-left: auto;           
+  margin-left: auto;
   cursor: pointer;
 }
 
@@ -418,25 +607,28 @@ html, body, #root {
 /* ========== Content start ========== */
 
 .content {
-  width: 90%;
+  width: min(90%, var(--max-width));
   margin: 0 auto;
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-8);
 }
 
 .page-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin: 1.75rem 0 .75rem;
+  gap: var(--space-4);
+  margin: var(--space-6) 0 var(--space-3);
 }
 
-.page-head h1 { 
-  margin: 0; 
+.page-head h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
 }
 
-.section-head { 
-  margin: 2rem 0 .75rem; 
+.section-head {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
 }
 
 /* ========== Content end ========== */
@@ -448,17 +640,25 @@ html, body, #root {
   background: var(--color-surface);
   border: 1px solid var(--color-bg);
   border-radius: .7rem;
-  padding: 1.1rem;
-  margin-bottom: 1rem;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
+/* One column on a phone, as many as fit after that. */
 .form .fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: .75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-3);
 }
 
-.field { display: flex; flex-direction: column; gap: .25rem; margin: 0 0 .75rem; }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
+  min-width: 0;
+}
+
 .fields .field { margin-bottom: 0; }
 
 label { font-size: .82rem; color: var(--color-primary); }
@@ -472,11 +672,20 @@ input, textarea, select {
   border-radius: .4rem;
   padding: .5rem .6rem;
   width: 100%;
+  max-width: 100%;
+  /* Under 16px, iOS Safari zooms the whole page in on focus and the user is
+     left scrolled sideways. */
+  font-size: 1rem;
 }
 
 textarea { resize: vertical; }
 
-.actions { display: flex; gap: .5rem; margin: .25rem 0 0; }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+}
 
 button.ghost {
   background: transparent;
@@ -500,9 +709,9 @@ button.ghost.danger:hover { background: var(--color-bg); }
   border: 1px solid var(--color-accent);
   color: var(--color-accent);
   border-radius: .6rem;
-  padding: .75rem 1rem;
-  width: 90%;
-  margin: 1.5rem auto 0;
+  padding: var(--space-3) var(--space-4);
+  width: min(90%, var(--max-width));
+  margin: var(--space-6) auto 0;
 }
 
 /* ========== Error end ========== */
@@ -510,26 +719,26 @@ button.ghost.danger:hover { background: var(--color-bg); }
 
 /* ========== Pets page start ========== */
 
-/* Two pets per row, one on small screens. minmax(0, 1fr) so a long name
-   cannot push a column wider than the other. */
+/* Two pets per row, one on a phone. minmax(0, 1fr) so a long name cannot
+   push a column wider than the other. */
 .pet-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1rem 0;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 48rem) {
   .pet-list { grid-template-columns: 1fr; }
 }
 
 .pet-item { border-top: 3px solid var(--color-primary); margin-bottom: 0; }
-.pet-item .species { margin: .1rem 0 .75rem; font-size: .85rem; color: var(--color-primary); }
+.pet-item .species { margin: .1rem 0 var(--space-3); font-size: .85rem; color: var(--color-primary); }
 
 .pet-item dl { margin: 0; display: grid; gap: .1rem; }
 .pet-item dt { font-size: .78rem; color: var(--color-primary); }
-.pet-item dd { margin: 0 0 .6rem; font-size: .9rem; }
-.pet-item .ghost { margin-top: .25rem; }
+.pet-item dd { margin: 0 0 var(--space-2); font-size: .9rem; }
+.pet-item .ghost { margin-top: var(--space-1); }
 
 .by { color: var(--color-primary); }
 
@@ -539,7 +748,7 @@ button.ghost.danger:hover { background: var(--color-bg); }
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: .5rem;
-  margin-bottom: .6rem;
+  margin-bottom: var(--space-2);
 }
 
 .photo-preview {
@@ -547,8 +756,7 @@ button.ghost.danger:hover { background: var(--color-bg); }
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: .5rem;
-  margin-top: .75rem;
-  display: block;
+  margin-top: var(--space-3);
 }
 
 .pet-title-link { color: inherit; text-decoration: none; }
@@ -556,9 +764,11 @@ button.ghost.danger:hover { background: var(--color-bg); }
 
 .pet-item-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-top: .25rem;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 .pet-item-actions .pet-link { margin-left: 0; text-decoration: none; }
@@ -566,7 +776,7 @@ button.ghost.danger:hover { background: var(--color-bg); }
 .field-error { font-size: .82rem; color: var(--color-accent); }
 
 /* The shared input rule gives file inputs a box that looks broken. */
-input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
+input[type="file"] { border: none; padding: var(--space-1) 0; background: transparent; }
 
 /* ========== Pets page end ========== */
 
@@ -575,7 +785,7 @@ input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
 
 .back-link {
   display: inline-block;
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
   color: var(--color-primary);
   font-size: .9rem;
   text-decoration: none;
@@ -586,9 +796,9 @@ input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
 /* The first box. Photo on the left, info on the right. */
 .pet-profile {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-6);
   align-items: flex-start;
-  margin-top: .75rem;
+  margin-top: var(--space-3);
   background: var(--color-bg);
   border: none;
 }
@@ -602,12 +812,13 @@ input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
 }
 
 .pet-profile-info { flex: 1; min-width: 0; }
-.pet-profile-info h1 { margin-bottom: .25rem; }
+.pet-profile-info h1 { margin-bottom: var(--space-1); font-size: clamp(1.8rem, 4vw, 2.5rem); }
 .pet-profile-info .detail-list { grid-template-columns: 8rem 1fr; }
 
-@media (max-width: 40rem) {
+@media (max-width: 48rem) {
   .pet-profile { flex-direction: column; }
   .pet-profile-photo { width: 100%; }
+  .pet-profile-info .detail-list { grid-template-columns: 1fr; }
 }
 
 /* ========== Pet detail page end ========== */
@@ -616,27 +827,50 @@ input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
 /* ========== Logs page start ========== */
 
 .detail { border-color: var(--color-primary); }
-.detail-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .detail-head h2 { margin: 0; }
 
 .detail-list {
   display: grid;
   grid-template-columns: 7rem 1fr;
-  gap: .3rem .75rem;
-  margin: .75rem 0 0;
+  gap: .3rem var(--space-3);
+  margin: var(--space-3) 0 0;
   font-size: .9rem;
 }
 
 .detail-list dt { color: var(--color-primary); }
 .detail-list dd { margin: 0; overflow-wrap: anywhere; }
 
+/* One column on a phone, or a 7rem label column leaves the id squeezed into
+   a two character strip. */
+@media (max-width: 40rem) {
+  .detail-list { grid-template-columns: 1fr; gap: 0 0; }
+  .detail-list dt { margin-top: var(--space-2); }
+}
+
 .list { list-style: none; padding: 0; margin: 0; }
 
 .row.editing { border-color: var(--color-primary); background: var(--color-bg); }
 
-.row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.row-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
 
-.note { margin: .5rem 0 0; overflow-wrap: anywhere; }
+.row-head h3 { margin: 0; min-width: 0; }
+
+.note { margin: var(--space-2) 0 0; overflow-wrap: anywhere; }
 
 /* One style for all four activities. The label says which one it is,
    so the tag-fed, tag-walk, tag-pee and tag-poop classes need no colour. */
@@ -655,35 +889,36 @@ input[type="file"] { border: none; padding: .25rem 0; background: transparent; }
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: .5rem 1rem;
-  margin-top: .75rem;
-  padding-top: .6rem;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
   border-top: 1px solid var(--color-bg);
   font-size: .85rem;
   color: var(--color-primary);
 }
 
-.row-buttons { display: flex; gap: .4rem; }
+.row-buttons { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 
-code { font-size: .85em; }
+code { font-size: .85em; overflow-wrap: anywhere; }
 
 .type-picks {
   border: none;
   padding: 0;
   margin: 0;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: .4rem .9rem;
+  gap: var(--space-1) var(--space-3);
   align-content: flex-start;
 }
- 
+
 .type-picks legend {
   font-size: .82rem;
   color: var(--color-primary);
   padding: 0;
-  margin-bottom: .25rem;
+  margin-bottom: var(--space-1);
 }
- 
+
 .type-pick {
   display: flex;
   align-items: center;
@@ -692,7 +927,7 @@ code { font-size: .85em; }
   color: var(--color-text);
   cursor: pointer;
 }
- 
+
 /* The shared input rule sets width 100%, which stretches checkboxes. */
 .type-pick input {
   width: auto;
@@ -709,8 +944,9 @@ code { font-size: .85em; }
   background: var(--color-bg);
   border: 1px solid var(--color-primary);
   border-radius: .6rem;
-  padding: .9rem 1rem;
-  margin: 1.5rem 0;
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-6) 0;
+  font-size: .9rem;
 }
 
 /* ========== Demo notice end ========== */
@@ -719,30 +955,37 @@ code { font-size: .85em; }
 /* ========== Footer start ========== */
 
 .site-footer {
-  margin-top: auto;  
+  margin-top: auto;
   background: var(--color-primary);
   color: var(--color-surface);
 }
 
 .footer-inner {
-  max-width: 90%;          
+  width: min(90%, var(--max-width));
   margin: 0 auto;
-  min-height: 5rem;   
-  padding: 1.25rem 1rem;
+  padding: var(--space-6) 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: .75rem 1.5rem;
-  font-size: 1.5rem;
+  gap: var(--space-3) var(--space-6);
+  /* Ordinary footer text size, not a heading size. Was maxing at 1.5rem,
+     which made "Home Pets Logs" read like a second nav bar. */
+  font-size: clamp(.85rem, 1.4vw, 1rem);
 }
 
 .footer-brand { margin: 0; }
 
+/* CarePawnion is the one line in the footer allowed to stand out a little
+   over the ordinary footer text size above. */
+.footer-brand strong {
+  font-size: 1.15em;
+}
+
 /* bg on primary is 5.6 : 1, so the softer text still passes contrast. */
 .site-footer .muted { color: var(--color-bg); }
 
-.footer-links { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
 
 .footer-links a {
   color: var(--color-surface);
@@ -756,27 +999,46 @@ code { font-size: .85em; }
 
 .footer-fine { flex-basis: 100%; margin: 0; font-size: .8rem; }
 
-
-@media (max-width: 30rem) {
-  .footer-inner { flex-direction: column; align-items: stretch; }
+@media (max-width: 40rem) {
+  .footer-inner { flex-direction: column; align-items: flex-start; }
 }
 
 /* ========== Footer end ========== */
 
+
+/* ========== Skip link start ========== */
+
 /* Hidden above the screen until Tab reaches it. */
 .skip-link {
   position: absolute;
-  left: 1rem;
+  left: var(--space-4);
   top: -4rem;
   z-index: 10;
   background: var(--color-primary);
   color: var(--color-surface);
-  padding: .5rem 1rem;
+  padding: var(--space-2) var(--space-4);
   border-radius: .4rem;
   text-decoration: none;
 }
 
-.skip-link:focus { top: 1rem; }
+.skip-link:focus { top: var(--space-4); }
 
 /* main only gets focus from the skip link, so no outline box around the whole screen. */
 .page-body:focus { outline: none; }
+
+/* ========== Skip link end ========== */
+
+
+/* ========== Motion start ========== */
+
+/* Some people get motion sick from animation. The app has almost none, but
+   the smooth scroll in Logs.jsx counts. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========== Motion end ========== */

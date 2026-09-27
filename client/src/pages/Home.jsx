@@ -35,7 +35,7 @@ export default function Home({ summary, status, busy, onLog, rows }) {
         </div>
       </header>
 
-      <HomeRectangle rows={rows} onOpen={() => navigate('/logs')} />
+      <HomeRectangle rows={rows} summary={summary} onOpen={() => navigate('/logs')} />
 
       {status === 'loading' && <p className="muted content">Loading...</p>}
 
