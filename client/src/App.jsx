@@ -10,6 +10,7 @@ import DemoNotice from './components/DemoNotice.jsx'
 import Home from './pages/Home.jsx'
 import Logs from './pages/Logs.jsx'
 import Pets from './pages/Pets.jsx'
+import PetDetail from './pages/Petdetail.jsx'
 
 // App owns the data and talks to the API. The pages only own what is on
 // screen (forms, detail panel), and hand the work back through the on... props.
@@ -203,6 +204,17 @@ export default function App() {
                 summary={summary}
                 onAdd={handleAddPet}
                 onRemove={handleDeletePet}
+              />
+            }
+          />
+          <Route
+            path="/pets/:id"
+            element={
+              <PetDetail 
+                status={status} 
+                slow={slow} 
+                summary={summary} 
+                rows={rows} 
               />
             }
           />

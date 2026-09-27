@@ -139,9 +139,8 @@ html, body, #root {
   text-decoration: none;
   background: transparent;
   color: var(--color-text);
-  border: 2px solid transparent;
-  border-radius: .4rem;
-  padding: .3rem .7rem;
+  border-bottom: 2px solid transparent;
+  padding: 0 .7rem;
   font-size: clamp(.95rem, 1.4vw, 1.1rem);
   font-weight: bold;
 }

@@ -9,8 +9,8 @@ import { NavLink } from 'react-router-dom'
 
 const PAGES = [
   { to: '/', label: 'Home' },
-  { to: '/logs', label: 'Logs' },
   { to: '/pets', label: 'Pets' },
+  { to: '/logs', label: 'Logs' },
 ]
 
 export default function Navigation() {
