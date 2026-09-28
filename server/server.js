@@ -181,6 +181,20 @@ app.post('/api/pets', async (request, response, next) => {
   }
 })
 
+// A rename also renames the pet's logs. See update in petsRepo.js.
+app.put('/api/pets/:id', async (request, response, next) => {
+  const { errors, value } = validatePet(request.body ?? {})
+  if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
+
+  try {
+    const row = await pets.update(pool, request.params.id, value)
+    if (!row) return response.status(404).json({ error: 'Not found' })
+    response.json(row)
+  } catch (error) {
+    next(error)
+  }
+})
+
 // The logs keep the pet name, so removing a pet does not erase their history.
 app.delete('/api/pets/:id', async (request, response, next) => {
   try {
@@ -202,6 +216,10 @@ app.use((error, request, response, next) => {
   // 22P02 is Postgres saying the id is not a valid uuid. That is bad input
   // from the client, not a server failure.
   if (error.code === '22P02') return response.status(400).json({ error: 'Invalid id' })
+  // express.json could not read the body. Also bad input, not a server failure.
+  if (error.type === 'entity.parse.failed') {
+    return response.status(400).json({ error: 'The request body is not valid JSON' })
+  }
   if (error.type === 'entity.too.large') {
     return response.status(413).json({ error: 'The request is too large' })
   }
