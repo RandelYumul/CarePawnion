@@ -572,10 +572,11 @@ html, body, #root {
    wide, which made the whole card look oversized next to the rest of the
    page. 4 by 3 with a cap keeps it in proportion on any column width. */
 .pet-photo {
+  display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  max-height: 13rem;
+  height: 20rem;
   object-fit: cover;
+  object-position: center;
 }
 
 /* Surface, so the empty photo still stands out from the bg card. */
@@ -1421,6 +1422,17 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   margin-bottom: var(--space-1);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
 }
+ 
+/* The name and Edit details on one row. A row and not position: absolute,
+   so on a phone the button sits beside the name instead of over the photo. */
+.pet-profile-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+ 
+.pet-profile-head button { flex: none; }
  
 /* The breed line sits in a chip, so the name above it stays the focal point. */
 .pet-profile-info .species {

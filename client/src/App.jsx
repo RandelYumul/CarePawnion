@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import {
   listLogs, getLog, createLog, updateLog, deleteLog,
-  listPets, createPet, deletePet,
+  listPets, createPet, updatePet, deletePet,
 } from './api'
 import { isOut, LIMITS } from './format.js'
 import Navigation from './components/Navigation.jsx'
@@ -96,6 +96,28 @@ export default function App() {
     } catch (caught) {
       setPets(previous)
       setError(caught)
+    }
+  }
+
+  // ---------- Pet details page ----------
+
+  // The logs keep the pet NAME, so a rename is copied onto the rows here too.
+  // The server already did the same in the database, this just saves a reload.
+  async function handleEditPet(id, input) {
+    setError(null)
+    const old = pets.find((pet) => pet.id === id)
+    try {
+      const updated = await updatePet(id, input)
+      setPets((previous) => previous.map((pet) => (pet.id === id ? updated : pet)))
+      if (old && old.name !== updated.name) {
+        setRows((previous) =>
+          previous.map((row) => (row.pet === old.name ? { ...row, pet: updated.name } : row))
+        )
+      }
+      return updated
+    } catch (caught) {
+      setError(caught)
+      return null
     }
   }
 
@@ -245,11 +267,11 @@ export default function App() {
             }
           />
           {/* One pet on its own page. It reads from summary and rows, so it
-              needs no data of its own and no extra API call. */}
+              needs no data of its own. onEdit hands the edit form back to App. */}
           <Route
             path="/pets/:id"
             element={
-              <PetDetail status={status} slow={slow} summary={summary} rows={rows} />
+              <PetDetail status={status} slow={slow} summary={summary} rows={rows} onEdit={handleEditPet} />
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />

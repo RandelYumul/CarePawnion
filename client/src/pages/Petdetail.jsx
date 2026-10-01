@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   labelOf, vetKindOf, formatWhen, formatTime, formatDate,
   dayLabel, ageOf, visitLabel, isVisitDue,
 } from '../format.js'
+import PetForm from '../components/Petform.jsx'
 
 // One pet on its own page. The profile box on top, the check up box and the
 // routine box in the middle, and every log for this pet grouped by day below.
@@ -10,6 +12,8 @@ import {
 // Like the other pages, it owns no data. summary and rows come from App, so
 // a log added on the Logs page shows up here without loading anything again.
 // There is no getPet yet, so the pet is found in the list App already has.
+// Edit swaps the profile box for PetForm, inside this same page, so the app
+// stays at five screens.
 
 // 0 to "12 AM", 13 to "1 PM". Written out, because 13:00 is not how the
 // house talks about walking the dog.
@@ -67,8 +71,9 @@ function routineOf(logs, type) {
   }
 }
 
-export default function PetDetail({ status, slow, summary, rows }) {
+export default function PetDetail({ status, slow, summary, rows, onEdit }) {
   const { id } = useParams()
+  const [editing, setEditing] = useState(false)
 
   // The id in the URL is always a string, the seed ids might not be.
   const pet = summary.find((item) => String(item.id) === id)
@@ -105,6 +110,12 @@ export default function PetDetail({ status, slow, summary, rows }) {
     )
   }
 
+  // Close the form only if it worked, so nothing typed is lost on a failure.
+  async function handleEdit(input) {
+    const saved = await onEdit(pet.id, input)
+    if (saved) setEditing(false)
+  }
+
   const now = new Date()
   const age = ageOf(pet.birthdate, now)
   const groups = groupByDay(logs, now)
@@ -125,50 +136,68 @@ export default function PetDetail({ status, slow, summary, rows }) {
     <section className="content">
       <Link to="/pets" className="back-link">« Back to pets</Link>
 
-      <article className="card pet-profile">
-        {pet.photo
-          ? <img className="pet-profile-photo" src={pet.photo} alt="" />
-          : <div className="pet-profile-photo pet-photo-empty" aria-hidden="true">🐾</div>}
+      {editing
+        ? (
+          <>
+            <h1>Edit {pet.name}</h1>
+            <PetForm
+              pet={pet}
+              submitLabel="Save changes"
+              onSubmit={handleEdit}
+              onCancel={() => setEditing(false)}
+            />
+          </>
+        )
+        : (
+        <article className="card pet-profile">
+          {pet.photo
+            ? <img className="pet-profile-photo" src={pet.photo} alt="" />
+            : <div className="pet-profile-photo pet-photo-empty" aria-hidden="true">🐾</div>}
 
-        <div className="pet-profile-info">
-          <h1>{pet.name}</h1>
-          <p className="species">
-            {[pet.species, pet.breed, age].filter(Boolean).join(', ')}
-          </p>
+          <div className="pet-profile-info">
+            {/* Name on the left, Edit details in the top right corner. */}
+            <div className="pet-profile-head">
+              <h1>{pet.name}</h1>
+              <button className="ghost" onClick={() => setEditing(true)}>Edit details</button>
+            </div>
+            <p className="species">
+              {[pet.species, pet.breed, age].filter(Boolean).join(', ')}
+            </p>
 
-          {/* The three things people open this page for, before the full list. */}
-          <div className="pet-stats">
-            <div className="pet-stat">
-              <span className="pet-stat-label">Last fed</span>
-              <strong>{pet.lastFed ? formatWhen(pet.lastFed.happened_at) : 'No record yet'}</strong>
-              {pet.lastFed && <span className="by">by {pet.lastFed.member}</span>}
+            {/* The three things people open this page for, before the full list. */}
+            <div className="pet-stats">
+              <div className="pet-stat">
+                <span className="pet-stat-label">Last fed</span>
+                <strong>{pet.lastFed ? formatWhen(pet.lastFed.happened_at) : 'No record yet'}</strong>
+                {pet.lastFed && <span className="by">by {pet.lastFed.member}</span>}
+              </div>
+              <div className="pet-stat">
+                <span className="pet-stat-label">Last out</span>
+                <strong>
+                  {pet.lastOut
+                    ? `${labelOf(pet.lastOut.type)}, ${formatWhen(pet.lastOut.happened_at)}`
+                    : 'No record yet'}
+                </strong>
+                {pet.lastOut && <span className="by">by {pet.lastOut.member}</span>}
+              </div>
+              <div className="pet-stat">
+                <span className="pet-stat-label">Total logs</span>
+                <strong>{logs.length}</strong>
+                <span className="by">since the first entry</span>
+              </div>
             </div>
-            <div className="pet-stat">
-              <span className="pet-stat-label">Last out</span>
-              <strong>
-                {pet.lastOut
-                  ? `${labelOf(pet.lastOut.type)}, ${formatWhen(pet.lastOut.happened_at)}`
-                  : 'No record yet'}
-              </strong>
-              {pet.lastOut && <span className="by">by {pet.lastOut.member}</span>}
-            </div>
-            <div className="pet-stat">
-              <span className="pet-stat-label">Total logs</span>
-              <strong>{logs.length}</strong>
-              <span className="by">since the first entry</span>
-            </div>
+
+            <dl className="detail-list">
+              <dt>Birthday</dt>
+              <dd>
+                {pet.birthdate
+                  ? formatDate(pet.birthdate)
+                  : <span className="muted">Not given</span>}
+              </dd>
+            </dl>
           </div>
-
-          <dl className="detail-list">
-            <dt>Birthday</dt>
-            <dd>
-              {pet.birthdate
-                ? formatDate(pet.birthdate)
-                : <span className="muted">Not given</span>}
-            </dd>
-          </dl>
-        </div>
-      </article>
+        </article>
+        )}
 
       <h2 className="section-head">Check ups</h2>
 

@@ -36,5 +36,6 @@ export const {
   deleteLog,
   listPets,
   createPet,
+  updatePet,
   deletePet,
 } = implementation

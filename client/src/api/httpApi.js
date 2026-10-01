@@ -44,5 +44,8 @@ export const listPets = () => request('/api/pets')
 export const createPet = (input) =>
   request('/api/pets', { method: 'POST', body: JSON.stringify(input) })
 
+export const updatePet = (id, input) =>
+  request(`/api/pets/${id}`, { method: 'PUT', body: JSON.stringify(input) })
+
 export const deletePet = (id) =>
   request(`/api/pets/${id}`, { method: 'DELETE' })

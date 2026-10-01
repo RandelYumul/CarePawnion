@@ -126,6 +126,24 @@ export async function createPet(input) {
   return created
 }
 
+// Same as the server, a rename also renames the logs, since a log keeps the
+// pet name and would lose its pet otherwise.
+export async function updatePet(id, input) {
+  await delay()
+  const pets = readPets()
+  const index = pets.findIndex((pet) => String(pet.id) === String(id))
+  if (index === -1) throw new Error('Not found')
+
+  const oldName = pets[index].name
+  pets[index] = { ...pets[index], ...input }
+  writePets(pets)
+
+  if (oldName !== pets[index].name) {
+    write(read().map((row) => (row.pet === oldName ? { ...row, pet: pets[index].name } : row)))
+  }
+  return pets[index]
+}
+
 export async function deletePet(id) {
   await delay()
   writePets(readPets().filter((pet) => String(pet.id) !== String(id)))
