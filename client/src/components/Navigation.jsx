@@ -23,9 +23,9 @@ export default function Navigation() {
   return (
     <nav className="nav">
       {/* Two spans so the brand can be two colours without an image. */}
-      <p className="brand">
+      <Link to="/" className="brand" onClick={() => setOpen(false)}>
         <span className="brand-a">Care</span><span className="brand-b">Pawnion</span>
-      </p>
+      </Link>
 
       {/* Only shown on small screens, by CSS. */}
       <button
