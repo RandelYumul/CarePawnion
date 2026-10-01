@@ -66,6 +66,10 @@ export default function PetForm({ pet, submitLabel, onSubmit, onCancel }) {
   const [saving, setSaving] = useState(false)
   const [photoError, setPhotoError] = useState(null)
 
+  // Only when editing. Nothing changed means nothing to save, so the
+  // button stays off instead of sending the same pet back.
+  const unchanged = Boolean(pet) && JSON.stringify(petForm) === JSON.stringify(toForm(pet))
+
   async function handlePhoto(event) {
     const file = event.target.files[0]
     if (!file) return
@@ -85,7 +89,7 @@ export default function PetForm({ pet, submitLabel, onSubmit, onCancel }) {
     const species = petForm.species === 'Other'
       ? petForm.otherSpecies.trim()
       : petForm.species
-    if (!petForm.name.trim() || !species) return
+    if (unchanged || !petForm.name.trim() || !species) return
 
     setSaving(true)
     await onSubmit({
@@ -173,7 +177,7 @@ export default function PetForm({ pet, submitLabel, onSubmit, onCancel }) {
       )}
 
       <p className="actions">
-        <button type="submit" disabled={saving}>
+        <button type="submit" disabled={saving || unchanged}>
           {saving ? 'Saving...' : submitLabel}
         </button>
         {onCancel && (

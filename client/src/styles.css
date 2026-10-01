@@ -281,13 +281,15 @@ html, body, #root {
   .masthead-body {
     flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-1);
   }
+
   .masthead-art {
     flex: none;
-    width: 70%;
+    width: 50%;
     margin: 0 auto;
   }
+
   .masthead-text {
     width: 100%;
     text-align: center;
@@ -503,7 +505,10 @@ html, body, #root {
 
 /* Tablet. The clock moves above the two lists, which stay side by side. */
 @media (max-width: 64rem) {
-  .hr-top { grid-template-columns: 1fr 1fr; }
+  .hr-top { 
+    grid-template-columns: 1fr 1fr; 
+  }
+
   .hr-clock {
     grid-column: 1 / -1;
     border-right: none;
@@ -515,23 +520,69 @@ html, body, #root {
 }
 
 /* Phone. Everything in one column. */
-@media (max-width: 40rem) {
+/* Phone. Clock on top, the two lists side by side below it. */
+@media (max-width: 48rem) {
   .home_rectangle {
     border-radius: 1rem;
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     transform: none;
     margin-bottom: var(--space-4);
+    box-shadow: 0 2px 8px var(--color-primary);
+    width: 100%;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
-  .hr-top { grid-template-columns: 1fr; }
+
+  .hr-top {
+    gap: var(--space-3);
+  }
+
+  .hr-clock {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+  }
+
+  .hr-date {
+    flex-basis: 100%;
+    font-size: .75rem;
+  }
+
+  .hr-time {
+    font-size: 1.1rem;
+  }
+
+  .hr-ago {
+    font-size: .8rem;
+  }
+
   .hr-due {
-    border-right: none;
-    border-bottom: 2px solid var(--color-primary);
-    padding: 0 0 var(--space-3);
+    padding-right: var(--space-3);
   }
-  .hr-due:last-child { border-bottom: none; padding-bottom: 0; }
-  .hr-last { text-align: left; }
-  .hr-date { font-size: .95rem; }
-  .hr-time { font-size: clamp(1.5rem, 7vw, 1.9rem); }
+
+  .hr-due-head {
+    font-size: 1rem;
+  }
+
+  .hr-due-none {
+    font-size: .8rem;
+  }
+
+  .hr-due-photo {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .hr-due-name {
+    font-size: .9rem;
+  }
+
+  .hr-last {
+    text-align: left;
+    font-size: .8rem;
+  }
+
 }
 
 /* ========== Home Rectangle end ========== */
@@ -835,7 +886,9 @@ button.ghost.danger:hover {
 .pet-item dd { margin: 0 0 var(--space-2); font-size: .9rem; }
 .pet-item .ghost { margin-top: var(--space-1); }
 
-.by { color: var(--color-primary); }
+.by { 
+  color: var(--color-primary); 
+}
 
 /* 4 / 3 with the same 13rem cap as the home card photo, or a wide column
    makes the photo taller than everything under it. */
@@ -880,63 +933,309 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
 
 /* ========== Pet detail page start ========== */
  
+/* A pill, so it reads as a control and not as body text. */
 .back-link {
   display: inline-block;
   margin-top: var(--space-6);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-bg);
+  border-radius: 1rem;
+  background: var(--color-surface);
   color: var(--color-primary);
   font-size: .9rem;
   text-decoration: none;
+  transition: border-color .15s, box-shadow .15s;
 }
  
-.back-link:hover { text-decoration: underline; }
+.back-link:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
  
-/* The first box. Photo on the left, info on the right. */
+/* The first box. Photo on the left, info on the right. The olive edge on the
+   left is the same mark the check up box and the section heads use, so the
+   page reads as one thing instead of three stacked cards. */
 .pet-profile {
   display: flex;
   gap: var(--space-6);
   align-items: flex-start;
   margin-top: var(--space-3);
-  background: var(--color-bg);
-  border: none;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-bg);
+  border-left: 5px solid var(--color-primary);
+  box-shadow: var(--shadow-lift);
 }
  
+/* A cream ring around the photo, so a dark picture does not run into the
+   card edge and a pale one still has a shape. */
 .pet-profile-photo {
   flex: none;
   width: 16rem;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: .7rem;
+  border: 4px solid var(--color-bg);
+  box-shadow: var(--shadow-soft);
+}
+ 
+.pet-photo-empty {
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  background: var(--color-bg);
 }
  
 .pet-profile-info { flex: 1; min-width: 0; }
-.pet-profile-info h1 { margin-bottom: var(--space-1); font-size: clamp(1.8rem, 4vw, 2.5rem); }
-.pet-profile-info .species { margin: 0 0 var(--space-4); color: var(--color-primary); }
-.pet-profile-info .detail-list { grid-template-columns: 8rem 1fr; }
  
-/* The three answers people open the page for. Columns on a wide screen,
-   stacked on a phone. */
+.pet-profile-info h1 {
+  margin-bottom: var(--space-1);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+ 
+/* The name and Edit details on one row. A row and not position: absolute,
+   so on a phone the button sits beside the name instead of over the photo. */
+.pet-profile-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+ 
+.pet-profile-head button { flex: none; }
+ 
+/* The breed line sits in a chip, so the name above it stays the focal point. */
+.pet-profile-info .species {
+  display: inline-block;
+  margin: 0 var(--space-2) var(--space-4) 0;
+  padding: .15rem var(--space-3);
+  border-radius: 1rem;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-size: .9rem;
+}
+ 
+/* The birthday used to be a plain grid row, easy to miss under the stats.
+   It is one fact people actually like seeing, so it gets its own small chip
+   instead of blending into the layout. */
+.pet-profile-info .detail-list {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding: .15rem var(--space-3);
+  border-radius: 1rem;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-size: .9rem;
+}
+ 
+.pet-profile-info .detail-list dt {
+  font-size: .9rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+ 
+.pet-profile-info .detail-list dt::before { 
+  content: '🎂 '; 
+}
+ 
+.pet-profile-info .detail-list dd { 
+  font-weight: 600; 
+}
+ 
+/* The three answers people open the page for. One small card each, so they
+   are the first thing the eye lands on after the name. */
 .pet-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: var(--space-4);
-  padding: var(--space-4) 0;
-  border-top: 1px solid var(--color-surface);
-  border-bottom: 1px solid var(--color-surface);
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: 0;
+  border: none;
 }
  
-.pet-stat { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
-.pet-stat-label { font-size: .8rem; color: var(--color-primary); }
-.pet-stat strong { font-size: 1rem; overflow-wrap: anywhere; }
-.pet-stat .by { font-size: .8rem; color: var(--color-primary); }
+.pet-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-bg);
+  border-top: 3px solid var(--color-primary);
+  border-radius: .5rem;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-soft);
+}
+ 
+.pet-stat-label {
+  font-size: .75rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+ 
+.pet-stat strong { 
+  font-size: 1.05rem; 
+  overflow-wrap: anywhere; 
+}
+
+.pet-stat .by { 
+  font-size: .8rem; 
+  color: var(--color-primary); 
+}
+ 
+.section-head {
+  margin: var(--space-8) 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-bg);
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+}
  
 @media (max-width: 48rem) {
-  .pet-profile { flex-direction: column; }
-  .pet-profile-photo { width: 100%; }
-  .pet-profile-info .detail-list { grid-template-columns: 1fr; }
+  .pet-profile { 
+    flex-direction: column; 
+    align-items: stretch; 
+    padding: var(--space-4); 
+  }
+
+  .pet-profile-photo { 
+    width: 60%; 
+    margin: 0 auto;
+  }
+
+  .pet-profile-info { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center; 
+  }
+
+  .pet-profile-head { 
+    display: contents; 
+  }
+
+  .pet-profile-head h1 { 
+    margin-top: 0; 
+  }
+  .pet-profile-head button { 
+    order: 1; 
+    width: 100%; 
+    margin-top: var(--space-4); 
+  }
+
+  .pet-stats { 
+    width: 100%; 
+  }
+
+  .pet-stat { 
+    align-items: center; 
+  }
+
+  .pet-stat .by { 
+    font-size: 0.7rem;
+  }
+
+  .pet-stat strong { 
+    font-size: .7rem; 
+  }
+
+  .pet-stat-label{
+    font-size: 0.7rem;
+  }
+
+  .pet-profile-info .detail-list { 
+    display: inline-flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+  }
+
 }
  
-/* The usual times box. One block per activity, each with a 24 hour strip. */
-.routine { margin-top: var(--space-3); }
+/* ---------- The check up box ---------- */
+ 
+.vet-box {
+  margin-top: var(--space-3);
+  border: 1px solid var(--color-bg);
+  border-left: 5px solid var(--color-primary);
+  box-shadow: var(--shadow-lift);
+}
+ 
+.vet-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-4);
+  border-radius: .5rem;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-soft);
+}
+ 
+/* Red once the day has passed. The whole box changes, not one word, because
+   a late check up is the one thing on this page worth interrupting for. The
+   words beside it say "3 days late" too, so colour is not the only sign. */
+.vet-next.vet-due {
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-warn);
+}
+ 
+.vet-next-label {
+  font-size: .75rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+ 
+.vet-next.vet-due .vet-next-label { color: var(--color-accent); }
+ 
+.vet-next-date { font-size: 1.15rem; }
+ 
+.vet-next-when {
+  margin-left: auto;
+  padding: .12rem var(--space-3);
+  border-radius: 1rem;
+  border: 1px solid currentColor;
+  font-size: .8rem;
+}
+ 
+.vet-list { margin-top: var(--space-4); }
+ 
+/* Each past visit gets a left rule instead of a divider line, so the list
+   reads as a timeline going down. */
+.vet-row {
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  border-left: 2px solid var(--color-bg);
+}
+ 
+.vet-row:last-child { padding-bottom: 0; }
+ 
+.vet-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+ 
+.vet-when { font-size: .95rem; }
+ 
+.vet-booked { margin: var(--space-1) 0 0; font-size: .85rem; }
+ 
+@media (max-width: 40rem) {
+  .vet-next-when { margin-left: 0; }
+}
+ 
+/* ---------- The usual times box ---------- */
+ 
+.routine {
+  margin-top: var(--space-3);
+  border: 1px solid var(--color-bg);
+  border-left: 5px solid var(--color-primary);
+  box-shadow: var(--shadow-lift);
+}
  
 .routine-intro { margin: 0 0 var(--space-4); font-size: .85rem; }
  
@@ -959,13 +1258,17 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
 .routine-usual { font-size: 1rem; }
 .routine-count { font-size: .85rem; margin-left: auto; }
  
-/* 24 columns, one per hour. Each bar grows from the bottom. */
+/* 24 columns, one per hour. Each bar grows from the bottom. The strip sits
+   in a cream tray, so the empty hours still show where the day runs. */
 .routine-bars {
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   align-items: end;
   gap: 2px;
   height: 4.5rem;
+  padding: var(--space-2);
+  border-radius: .4rem;
+  background: var(--color-bg);
 }
  
 .routine-bar {
@@ -973,17 +1276,20 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   align-items: flex-end;
   height: 100%;
   border-radius: .2rem;
-  background: var(--color-bg);
+  background: transparent;
 }
  
 .routine-bar-fill {
   width: 100%;
   min-height: 2px;
   border-radius: .2rem;
-  background: var(--color-bg);
+  background: var(--color-surface);
 }
  
-.routine-bar.filled .routine-bar-fill { background: var(--color-primary); }
+.routine-bar.filled .routine-bar-fill {
+  background: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
  
 /* Only five marks, or the labels overlap on a phone. */
 .routine-scale {
@@ -1178,10 +1484,11 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: .8rem; 
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 48rem) {
   .footer-inner { 
     flex-direction: column; 
-    align-items: flex-start; 
+    align-items: center; 
+    font-size: 0.6rem;
   }
 }
 
@@ -1361,167 +1668,6 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   color: var(--color-primary);
   white-space: nowrap;
 }
-
-/* ========== Pet detail page start ========== */
- 
-/* A pill, so it reads as a control and not as body text. */
-.back-link {
-  display: inline-block;
-  margin-top: var(--space-6);
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-bg);
-  border-radius: 1rem;
-  background: var(--color-surface);
-  color: var(--color-primary);
-  font-size: .9rem;
-  text-decoration: none;
-  transition: border-color .15s, box-shadow .15s;
-}
- 
-.back-link:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-soft);
-}
- 
-/* The first box. Photo on the left, info on the right. The olive edge on the
-   left is the same mark the check up box and the section heads use, so the
-   page reads as one thing instead of three stacked cards. */
-.pet-profile {
-  display: flex;
-  gap: var(--space-6);
-  align-items: flex-start;
-  margin-top: var(--space-3);
-  padding: var(--space-6);
-  background: var(--color-surface);
-  border: 1px solid var(--color-bg);
-  border-left: 5px solid var(--color-primary);
-  box-shadow: var(--shadow-lift);
-}
- 
-/* A cream ring around the photo, so a dark picture does not run into the
-   card edge and a pale one still has a shape. */
-.pet-profile-photo {
-  flex: none;
-  width: 16rem;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: .7rem;
-  border: 4px solid var(--color-bg);
-  box-shadow: var(--shadow-soft);
-}
- 
-.pet-photo-empty {
-  display: grid;
-  place-items: center;
-  font-size: 3rem;
-  background: var(--color-bg);
-}
- 
-.pet-profile-info { flex: 1; min-width: 0; }
- 
-.pet-profile-info h1 {
-  margin-bottom: var(--space-1);
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-}
- 
-/* The name and Edit details on one row. A row and not position: absolute,
-   so on a phone the button sits beside the name instead of over the photo. */
-.pet-profile-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
- 
-.pet-profile-head button { flex: none; }
- 
-/* The breed line sits in a chip, so the name above it stays the focal point. */
-.pet-profile-info .species {
-  display: inline-block;
-  margin: 0 0 var(--space-4);
-  padding: .15rem var(--space-3);
-  border-radius: 1rem;
-  background: var(--color-bg);
-  color: var(--color-primary);
-  font-size: .9rem;
-}
- 
-/* The birthday used to be a plain grid row, easy to miss under the stats.
-   It is one fact people actually like seeing, so it gets its own small chip
-   instead of blending into the layout. */
-.pet-profile-info .detail-list {
-  display: inline-grid;
-  grid-template-columns: auto auto;
-  align-items: baseline;
-  gap: 0 var(--space-2);
-  margin-top: var(--space-4);
-  padding: var(--space-2) var(--space-3);
-  border-radius: .5rem;
-  background: var(--color-bg);
-  border-left: 3px solid var(--color-primary);
-}
- 
-.pet-profile-info .detail-list dt {
-  font-size: .75rem;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
- 
-.pet-profile-info .detail-list dt::before { 
-  content: '🎂 '; 
-}
- 
-.pet-profile-info .detail-list dd { 
-  font-weight: 600; 
-}
- 
-/* The three answers people open the page for. One small card each, so they
-   are the first thing the eye lands on after the name. */
-.pet-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: var(--space-3);
-  margin: var(--space-4) 0;
-  padding: 0;
-  border: none;
-}
- 
-.pet-stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--color-bg);
-  border-top: 3px solid var(--color-primary);
-  border-radius: .5rem;
-  background: var(--color-bg);
-  box-shadow: var(--shadow-soft);
-}
- 
-.pet-stat-label {
-  font-size: .75rem;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-}
- 
-.pet-stat strong { font-size: 1.05rem; overflow-wrap: anywhere; }
-.pet-stat .by { font-size: .8rem; color: var(--color-primary); }
- 
-/* An olive rule under every heading, so the page has a repeating mark. */
-.section-head {
-  margin: var(--space-8) 0 var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 2px solid var(--color-bg);
-  font-size: clamp(1.3rem, 3vw, 1.75rem);
-}
- 
-@media (max-width: 48rem) {
-  .pet-profile { flex-direction: column; padding: var(--space-4); }
-  .pet-profile-photo { width: 100%; }
-  .pet-profile-info .detail-list { display: inline-flex; flex-wrap: wrap; }
-}
  
 /* ---------- The check up box ---------- */
  
@@ -1598,81 +1744,3 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   .vet-next-when { margin-left: 0; }
 }
  
-/* ---------- The usual times box ---------- */
- 
-.routine {
-  margin-top: var(--space-3);
-  border: 1px solid var(--color-bg);
-  border-left: 5px solid var(--color-primary);
-  box-shadow: var(--shadow-lift);
-}
- 
-.routine-intro { margin: 0 0 var(--space-4); font-size: .85rem; }
- 
-.routine-row {
-  padding: var(--space-4) 0;
-  border-top: 1px solid var(--color-bg);
-}
- 
-.routine-row:first-of-type { border-top: none; padding-top: 0; }
-.routine-row:last-child { padding-bottom: 0; }
- 
-.routine-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-3);
-}
- 
-.routine-usual { font-size: 1rem; }
-.routine-count { font-size: .85rem; margin-left: auto; }
- 
-/* 24 columns, one per hour. Each bar grows from the bottom. The strip sits
-   in a cream tray, so the empty hours still show where the day runs. */
-.routine-bars {
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  align-items: end;
-  gap: 2px;
-  height: 4.5rem;
-  padding: var(--space-2);
-  border-radius: .4rem;
-  background: var(--color-bg);
-}
- 
-.routine-bar {
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
-  border-radius: .2rem;
-  background: transparent;
-}
- 
-.routine-bar-fill {
-  width: 100%;
-  min-height: 2px;
-  border-radius: .2rem;
-  background: var(--color-surface);
-}
- 
-.routine-bar.filled .routine-bar-fill {
-  background: var(--color-primary);
-  box-shadow: var(--shadow-soft);
-}
- 
-/* Only five marks, or the labels overlap on a phone. */
-.routine-scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-1);
-  font-size: .75rem;
-  color: var(--color-primary);
-}
- 
-@media (max-width: 40rem) {
-  .routine-count { margin-left: 0; }
-  .routine-bars { height: 3.5rem; gap: 1px; }
-}
- 
-/* ========== Pet detail page end ========== */

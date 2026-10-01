@@ -163,6 +163,14 @@ export default function PetDetail({ status, slow, summary, rows, onEdit }) {
             <p className="species">
               {[pet.species, pet.breed, age].filter(Boolean).join(', ')}
             </p>
+            <dl className="detail-list">
+              <dt>Birthday: </dt>
+              <dd>
+                {pet.birthdate
+                  ? formatDate(pet.birthdate)
+                  : <span className="muted">Not given</span>}
+              </dd>
+            </dl>
 
             {/* The three things people open this page for, before the full list. */}
             <div className="pet-stats">
@@ -187,14 +195,6 @@ export default function PetDetail({ status, slow, summary, rows, onEdit }) {
               </div>
             </div>
 
-            <dl className="detail-list">
-              <dt>Birthday</dt>
-              <dd>
-                {pet.birthdate
-                  ? formatDate(pet.birthdate)
-                  : <span className="muted">Not given</span>}
-              </dd>
-            </dl>
           </div>
         </article>
         )}

@@ -23,7 +23,6 @@ export default function Footer() {
           <Link to="/">Home</Link>
           <Link to="/pets">Pets</Link>
           <Link to="/logs">Logs</Link>
-          <Link to="/logs/new">Log care</Link>
         </nav>
 
         <p className="footer-fine muted">
