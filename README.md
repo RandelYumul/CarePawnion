@@ -3,7 +3,7 @@
 A shared pet care log for households, so everyone can see when each pet was
 last fed, walked, or let out, and who did it.
 
-**Live site:** https://carepawnion.pages.dev
+**Live site:** https://carepawnion.pages.dev (invite only, see [Access](#access))
 **API:** https://carepawnion.onrender.com/healthz
 **Demo video:** (link)
 
@@ -144,6 +144,17 @@ Cloudflare, and changes in `server/` redeploy the API on Render. Changes to
 The GitHub Pages workflow in `.github/workflows/deploy-pages.yml` is still in
 the repository from the template, and publishes a demo mode copy of the client.
 
+## Access
+
+The live site is behind Cloudflare Access, for both `carepawnion.pages.dev` and
+its preview links. Only emails on the access policy can open it. Visitors enter
+their email and get a one-time login code, so there are no passwords to keep.
+To add someone, add their email to the Include rule of the policy in
+Cloudflare One, under **Access controls > Applications**.
+
+The security checks for this project are in
+[SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md).
+
 ## Project structure
 
     client/          React front end, built by Vite
@@ -157,17 +168,19 @@ the repository from the template, and publishes a demo mode copy of the client.
 
 ## Architecture
 
-The React client is served from Cloudflare Pages. It calls the Express API on
-Render, and only the Cloudflare Pages origin is allowed through CORS. The API
+The React client is served from Cloudflare Pages, behind Cloudflare Access, so
+only invited emails can open it. It calls the Express API on Render, and only
+the Cloudflare Pages origin is allowed through CORS. The API
 reads and writes a PostgreSQL database on Neon over an encrypted connection.
 Each piece is deployed from the same GitHub repository.
 
 ## What I would do next
 
-- Put the live site behind Cloudflare Access, so only chosen household members
-  can open it
-- Turn off the GitHub Pages copy once the site is protected, so there is only
-  one public link
+- Put the API behind the same gate, since Access only covers the client and a
+  direct request to Render can still change data
+- Connect to Neon with a role that can only read and write `pets` and `logs`,
+  instead of the owner role
+- Turn off the GitHub Pages demo copy, so there is only one link
 - Save a separate note for each activity type, since logging several types at
   once copies the same note to every log
 
