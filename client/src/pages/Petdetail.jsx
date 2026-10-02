@@ -96,7 +96,7 @@ export default function PetDetail({ status, slow, summary, rows, onEdit }) {
   if (status === 'error') {
     return (
       <section className="content">
-        <Link to="/pets" className="back-link">« Back to pets</Link>
+        <Link to="/pets" className="ghost">« Back to pets</Link>
       </section>
     )
   }
@@ -104,7 +104,7 @@ export default function PetDetail({ status, slow, summary, rows, onEdit }) {
   if (!pet) {
     return (
       <section className="content">
-        <Link to="/pets" className="back-link">« Back to pets</Link>
+        <Link to="/pets" className="back-link ghost">« Back to pets</Link>
         <p className="muted">This pet was not found. It may have been removed.</p>
       </section>
     )

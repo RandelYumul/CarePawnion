@@ -501,7 +501,10 @@ html, body, #root {
   text-align: right;
 }
 
-.hr-last .pet-link { margin-left: var(--space-2); padding: 0; }
+.hr-last .pet-link { 
+  margin-left: var(--space-2); 
+  padding: 0; 
+}
 
 /* Tablet. The clock moves above the two lists, which stay side by side. */
 @media (max-width: 64rem) {
@@ -706,7 +709,9 @@ html, body, #root {
   cursor: pointer;
 }
 
-.pet-link:hover { text-decoration: underline; }
+.pet-link:hover { 
+  text-decoration: underline; 
+}
 
 /* ========== Pet card end ========== */
 
@@ -818,6 +823,7 @@ button.ghost:hover {
   color: var(--color-bg);
   border-color: var(--color-bg);
 }
+
 button.ghost.danger { 
   color: var(--color-accent); 
 }
@@ -935,21 +941,23 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
  
 /* A pill, so it reads as a control and not as body text. */
 .back-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   margin-top: var(--space-6);
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-bg);
-  border-radius: 1rem;
-  background: var(--color-surface);
+  padding: .3rem .6rem;
+  border: 1px solid var(--color-primary);
+  border-radius: .4rem;
+  background: var(--color-bg);
   color: var(--color-primary);
-  font-size: .9rem;
+  font-size: .85rem;
   text-decoration: none;
-  transition: border-color .15s, box-shadow .15s;
 }
- 
+
 .back-link:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-soft);
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border-color: var(--color-bg);
 }
  
 /* The first box. Photo on the left, info on the right. The olive edge on the
@@ -1613,9 +1621,22 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
 }
+
+/* Fixed widths, so Fed and Walk take the same space and the notes line up. */
+.log-row .tag {
+  min-width: 4.5rem;
+  text-align: center;
+}
  
-.log-pet { font-weight: 600; }
-.log-member { color: var(--color-primary); }
+.log-pet {
+  min-width: 6rem;
+  font-weight: 600;
+}
+
+.log-member {
+  min-width: 7rem;
+  color: var(--color-primary);
+}
  
 .log-note {
   flex: 1 1 12rem;
@@ -1639,6 +1660,64 @@ code { font-size: .85em; overflow-wrap: anywhere; }
 
   .logs-top > .form {
     order: -1;
+  }
+
+  .log-row {
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-3) 0;
+  }
+
+  .log-time {
+    min-width: 0;
+    font-weight: 600;
+  }
+
+  .log-member {
+    min-width: 0;
+    margin-left: auto;
+    font-size: .8rem;
+  }
+
+  .log-note {
+    flex-basis: 100%;
+    padding: var(--space-1) var(--space-2);
+    border-radius: .4rem;
+    background: var(--color-bg);
+    font-size: .85rem;
+  }
+
+  .log-row .row-buttons {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: var(--space-2);
+    width: 100%;
+    margin: var(--space-1) 0 0;
+  }
+
+  .log-row .row-buttons button {
+    min-height: 2.25rem;
+  }
+
+  .log-row .tag {
+    min-width: 3.5rem;
+  }
+
+  .log-pet {
+    min-width: 0;
+  }
+}
+@media (max-width: 22.5rem) {
+  .log-row {
+    font-size: .85rem;
+  }
+
+  .log-row .tag {
+    min-width: 0;
+  }
+
+  .log-row .row-buttons {
+    gap: var(--space-1);
   }
 }
  
