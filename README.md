@@ -7,6 +7,12 @@ last fed, walked, or let out, and who did it.
 **API:** https://carepawnion.onrender.com/healthz
 **Demo video:** (link)
 
+![Built with Claude](https://img.shields.io/badge/built%20with-Claude-5f6448)
+
+This project was built with help from Claude by Anthropic. See
+[AI-USAGE.md](AI-USAGE.md) for how it was used, where it got things wrong, and
+which parts I wrote myself.
+
 ![A screenshot of the main screen](docs/assets/screenshot.png)
 
 ## What it does
