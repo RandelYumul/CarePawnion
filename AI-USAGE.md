@@ -67,6 +67,14 @@ myself to get the design I wanted.
 * What I kept, what I changed, and why: I kept the deploy sections and checked the feature list against my code. I kept my name in the Author section by choice.
 * Commit: https://github.com/RandelYumul/CarePawnion/commit/399436c
 
+### 2026-10-02 - Giving each logged type its own note
+
+* Tool: Claude (claude.ai)
+* What I asked for: To check if logging several types at once still copies one note to every log.
+* What it gave back: It found that the form had one note box and the loop sent the same note with each type. It gave a fix with one note box per checked type, kept in a `notes` object by type.
+* What I kept, what I changed, and why: I first thought the bug did not happen, since my test used one type. After checking again with two types, I kept the fix. With one type the form looks the same as before.
+* Commit: https://github.com/RandelYumul/CarePawnion/commit/adc4b44
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Mobile CSS that never applied
