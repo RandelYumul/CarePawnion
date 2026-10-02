@@ -477,8 +477,6 @@ html, body, #root {
   min-width: 0;
 }
 
-/* One line with dots at the end, so "Sir Bartholomew Fluffington III" cannot
-   stretch the column. */
 .hr-due-name {
   font-size: 1rem;
   overflow: hidden;
@@ -506,7 +504,6 @@ html, body, #root {
   padding: 0; 
 }
 
-/* Tablet. The clock moves above the two lists, which stay side by side. */
 @media (max-width: 64rem) {
   .hr-top { 
     grid-template-columns: 1fr 1fr; 
@@ -522,8 +519,6 @@ html, body, #root {
   .hr-shortcuts { justify-content: space-between; }
 }
 
-/* Phone. Everything in one column. */
-/* Phone. Clock on top, the two lists side by side below it. */
 @media (max-width: 48rem) {
   .home_rectangle {
     border-radius: 1rem;
@@ -693,10 +688,18 @@ html, body, #root {
 }
 
 /* Red means due, green means done within the limit in format.js. */
-.chip-due { background: var(--color-accent); }
-.chip-ok { background: var(--color-primary); }
+.chip-due { 
+  background: var(--color-accent); 
+}
 
-.chip:hover { filter: brightness(.92); }
+.chip-ok { 
+  background: var(--color-primary); 
+}
+
+.chip:hover { 
+  filter: brightness(.92); 
+}
+
 .chip:disabled { opacity: .6; cursor: default; }
 
 .pet-link {
@@ -1492,11 +1495,19 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: .8rem; 
 }
 
+.footer-fine a {
+  color: inherit;
+}
+
 @media (max-width: 48rem) {
   .footer-inner { 
     flex-direction: column; 
-    align-items: center; 
-    font-size: 0.6rem;
+    align-items: flex-start; 
+    font-size: 0.8rem;
+  }
+
+  .footer-fine { 
+    font-size: 0.8rem; 
   }
 }
 

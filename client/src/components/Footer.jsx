@@ -26,7 +26,10 @@ export default function Footer() {
         </nav>
 
         <p className="footer-fine muted">
-          {YEAR} CarePawnion. Built for 6APSI.
+          {YEAR} CarePawnion. Built for 6APSI. Hero image by DegenerSumon from{' '}
+          <a href="https://pngtree.com/freepng/mixed-breed-dog-and-cat-looking-at-each-other-isolated-on-white_14804108.html">
+            Pngtree
+          </a>.
         </p>
       </div>
     </footer>
