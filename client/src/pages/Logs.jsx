@@ -14,8 +14,9 @@ import {
 
 // types is a list, so one submit can log pee and poop at the same time.
 // Each checked type still becomes its own log, since a log has one type.
+// notes is keyed by type, so each checked type keeps its own note.
 // vetKind and nextVisit are only sent when the type is vet.
-const EMPTY_FORM = { pet: '', types: ['fed'], member: '', note: '', vetKind: 'vaccine', nextVisit: '' }
+const EMPTY_FORM = { pet: '', types: ['fed'], member: '', notes: {}, vetKind: 'vaccine', nextVisit: '' }
 
 // Local date, not toISOString, or the earliest allowed next visit is
 // yesterday before 8am in PH.
@@ -95,17 +96,19 @@ export default function Logs({ status, slow, rows, pets, summary, limits, onSave
     event.preventDefault()
     if (!form.pet.trim() || !form.member.trim() || form.types.length === 0) return
 
+    // Each checked type keeps its own note, so Fed and Poop do not share one.
+    const noteFor = (type) => (form.notes[type] ?? '').trim()
+
     const base = {
       pet: form.pet.trim(),
       member: form.member.trim(),
-      note: form.note.trim(),
     }
 
     setSaving(true)
 
     if (editingId) {
       const type = form.types[0]
-      const saved = await onSave({ ...base, type, ...vetFieldsFor(type) }, editingId)
+      const saved = await onSave({ ...base, type, note: noteFor(type), ...vetFieldsFor(type) }, editingId)
       setSaving(false)
       // If it failed, App shows the error and the form keeps what was typed.
       if (!saved) return
@@ -116,10 +119,11 @@ export default function Logs({ status, slow, rows, pets, summary, limits, onSave
       return
     }
 
-    // One log per checked type, one after another. Same pet, person and note.
+    // One log per checked type, one after another. Same pet and person, each
+    // with its own note.
     const done = []
     for (const type of form.types) {
-      const saved = await onSave({ ...base, type, ...vetFieldsFor(type) }, null)
+      const saved = await onSave({ ...base, type, note: noteFor(type), ...vetFieldsFor(type) }, null)
       if (!saved) {
         // Uncheck the ones that already saved, so trying again does not
         // log them twice.
@@ -171,7 +175,7 @@ export default function Logs({ status, slow, rows, pets, summary, limits, onSave
       pet: row.pet,
       types: [row.type],
       member: row.member,
-      note: row.note ?? '',
+      notes: { [row.type]: row.note ?? '' },
       vetKind: row.vet_kind ?? 'vaccine',
       // The input needs 'YYYY-MM-DD', and the API may hand back a full date.
       nextVisit: row.next_visit ? String(row.next_visit).slice(0, 10) : '',
@@ -415,18 +419,26 @@ export default function Logs({ status, slow, rows, pets, summary, limits, onSave
               </div>
             )}
 
-            <p className="field">
-              <label htmlFor="note">
-                {isVet ? 'Details, vaccine name or what the vet said' : 'Note, food type or amount'}
-              </label>
-              <textarea
-                id="note"
-                value={form.note}
-                onChange={(event) => setForm({ ...form, note: event.target.value })}
-                maxLength={2000}
-                rows={3}
-              />
-            </p>
+            {/* One note per checked type. With one type it reads the same as before. */}
+            {form.types.map((type) => (
+              <p key={type} className="field">
+                <label htmlFor={`note-${type}`}>
+                  {type === 'vet'
+                    ? 'Details, vaccine name or what the vet said'
+                    : form.types.length > 1
+                      ? `Note for ${labelOf(type)}`
+                      : 'Note, food type or amount'}
+                </label>
+                <textarea
+                  id={`note-${type}`}
+                  value={form.notes[type] ?? ''}
+                  onChange={(event) =>
+                    setForm({ ...form, notes: { ...form.notes, [type]: event.target.value } })}
+                  maxLength={2000}
+                  rows={form.types.length > 1 ? 2 : 3}
+                />
+              </p>
+            ))}
 
             <p className="actions">
               <button type="submit" disabled={saving || form.types.length === 0}>
