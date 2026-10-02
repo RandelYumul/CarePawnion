@@ -5,23 +5,23 @@
     { "id": "pet-3", "name": "Milky", "species": "Dog", "breed": "Schweenie", "birthdate": "2019-06-30" }
   ],
   "feedings": [
-    { "id": "feed-1", "pet_id": "pet-1", "member": "Randel", "food": "1 cup dry kibble", "happened_at": "2026-09-20T07:10:00.000Z" },
+    { "id": "feed-1", "pet_id": "pet-1", "member": "Kuya", "food": "1 cup dry kibble", "happened_at": "2026-09-20T07:10:00.000Z" },
     { "id": "feed-2", "pet_id": "pet-2", "member": "Mama", "food": "half can wet food", "happened_at": "2026-09-20T07:25:00.000Z" },
-    { "id": "feed-3", "pet_id": "pet-3", "member": "Randel", "food": "2 cups kibble plus a spoon of rice, and a small piece of boiled chicken because he refused to eat otherwise. This note is deliberately long, because a seed row of four words hides every text-wrapping bug you have.", "happened_at": "2026-09-19T18:40:00.000Z" },
+    { "id": "feed-3", "pet_id": "pet-3", "member": "Kuya", "food": "2 cups kibble plus a spoon of rice, and a small piece of boiled chicken because he refused to eat otherwise. This note is deliberately long, because a seed row of four words hides every text-wrapping bug you have.", "happened_at": "2026-09-19T18:40:00.000Z" },
     { "id": "feed-4", "pet_id": "pet-1", "member": "Ate", "food": "", "happened_at": "2026-09-19T18:00:00.000Z" },
-    { "id": "feed-5", "pet_id": "pet-2", "member": "Randel", "food": "1 cup dry kibble", "happened_at": "2026-09-18T07:05:00.000Z" }
+    { "id": "feed-5", "pet_id": "pet-2", "member": "Kuya", "food": "1 cup dry kibble", "happened_at": "2026-09-18T07:05:00.000Z" }
   ],
   "outings": [
-    { "id": "out-1", "pet_id": "pet-1", "member": "Randel", "type": "walk", "note": "Around the block, about 20 minutes.", "happened_at": "2026-09-20T06:30:00.000Z" },
-    { "id": "out-2", "pet_id": "pet-1", "member": "Randel", "type": "poop", "note": "", "happened_at": "2026-09-20T06:35:00.000Z" },
+    { "id": "out-1", "pet_id": "pet-1", "member": "Kuya", "type": "walk", "note": "Around the block, about 20 minutes.", "happened_at": "2026-09-20T06:30:00.000Z" },
+    { "id": "out-2", "pet_id": "pet-1", "member": "Kuya", "type": "poop", "note": "", "happened_at": "2026-09-20T06:35:00.000Z" },
     { "id": "out-3", "pet_id": "pet-3", "member": "Papa", "type": "pee", "note": "Backyard only, it was raining.", "happened_at": "2026-09-19T21:15:00.000Z" },
     { "id": "out-4", "pet_id": "pet-3", "member": "Papa", "type": "walk", "note": "Skipped the long route.", "happened_at": "2026-09-19T17:00:00.000Z" },
     { "id": "out-5", "pet_id": "pet-1", "member": "Ate", "type": "pee", "note": "", "happened_at": "2026-09-18T20:10:00.000Z" }
   ],
   "vet": [
-    { "id": "vet-1", "pet_id": "pet-1", "member": "Randel", "kind": "vaccine", "note": "5 in 1 vaccine, second dose. No reaction after.", "next_visit": "2026-10-04", "happened_at": "2026-09-06T02:30:00.000Z" },
+    { "id": "vet-1", "pet_id": "pet-1", "member": "Kuya", "kind": "vaccine", "note": "5 in 1 vaccine, second dose. No reaction after.", "next_visit": "2026-10-04", "happened_at": "2026-09-06T02:30:00.000Z" },
     { "id": "vet-2", "pet_id": "pet-2", "member": "Mama", "kind": "checkup", "note": "Routine check up. Weight is normal, ears cleaned.", "next_visit": "2026-12-05", "happened_at": "2026-09-05T03:00:00.000Z" },
     { "id": "vet-3", "pet_id": "pet-3", "member": "Papa", "kind": "treatment", "note": "Skin allergy on the belly. Given a week of medicine.", "next_visit": "2026-09-22", "happened_at": "2026-09-15T01:45:00.000Z" },
-    { "id": "vet-4", "pet_id": "pet-1", "member": "Randel", "kind": "vaccine", "note": "Anti rabies, yearly.", "next_visit": "", "happened_at": "2026-08-02T02:00:00.000Z" }
+    { "id": "vet-4", "pet_id": "pet-1", "member": "Kuya", "kind": "vaccine", "note": "Anti rabies, yearly.", "next_visit": "", "happened_at": "2026-08-02T02:00:00.000Z" }
   ]
 }
