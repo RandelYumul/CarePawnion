@@ -62,10 +62,6 @@ The Log care form opens from its button. More than one type can be checked.
 
 Set limits changes how many hours pass before a pet shows as due.
 
-### Empty state
-
-<img src="assets/mockup/home-empty.png" width="720" alt="Home with no pets yet">
-
 ### On a phone
 
 The logs show a few sample rows, since the rest repeat.
