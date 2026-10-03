@@ -7,12 +7,6 @@ last fed, walked, or let out, and who did it.
 **API:** https://carepawnion.onrender.com/healthz
 **Demo video:** (link)
 
-![Built with Claude](https://img.shields.io/badge/built%20with-Claude-5f6448)
-
-This project was built with help from Claude by Anthropic. See
-[AI-USAGE.md](AI-USAGE.md) for how it was used, where it got things wrong, and
-which parts I wrote myself.
-
 ![A screenshot of the main screen](docs/assets/screenshot.png)
 
 ## What it does
@@ -181,13 +175,24 @@ Each piece is deployed from the same GitHub repository.
 - Connect to Neon with a role that can only read and write `pets` and `logs`,
   instead of the owner role
 - Turn off the GitHub Pages demo copy, so there is only one link
-- Save a separate note for each activity type, since logging several types at
-  once copies the same note to every log
 
 ## Author
 
 Randel Angelo L. Yumul — https://github.com/RandelYumul
 HAU 6APSI, CS-402
+
+## AI use
+
+![Built with AI assistance](https://img.shields.io/badge/built%20with-AI%20assistance-5f6448)
+
+This project was built with help from Claude by Anthropic, used through the
+claude.ai chat. I used it as a guide for setting up Neon, deploying to Render and
+Cloudflare Pages, and adding Cloudflare Access, and for parts of the features
+like pet editing and the mobile layouts. I modified most of the code it gave to
+match the requirements and the course lessons. The design, the responsive layout
+in the CSS and JSX, and the logs data and queries are my own work.
+
+The full record, with commits, is in [AI-USAGE.md](AI-USAGE.md).
 
 ## Licence
 
