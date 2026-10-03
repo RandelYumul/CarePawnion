@@ -107,6 +107,8 @@ html, body, #root {
 /* ========== Navigation start ========== */
 
 .nav {
+  position: relative;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   width: 100%;
@@ -180,10 +182,16 @@ html, body, #root {
 
   .nav-links {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     flex-direction: column;
     align-items: center;
-    width: 100%;
     gap: 0;
+    padding: var(--space-2) var(--gutter) var(--space-4);
+    background-color: var(--color-bg);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .12);
   }
 
   .nav-links.open {
@@ -218,9 +226,6 @@ html, body, #root {
 
 /* ========== Masthead start ========== */
 
-/* No fixed vh height. The masthead is as tall as the words inside it, so
-   nothing spills out when the text wraps on a phone. No bottom padding, so
-   the artwork rests on the bottom edge instead of hovering above it. */
 .masthead {
   border-bottom: 1px solid var(--color-bg);
   background: linear-gradient(
@@ -232,8 +237,6 @@ html, body, #root {
   padding: var(--space-8) 0 0;
 }
 
-/* flex-end, so the words and the artwork both rest on the bottom edge of
-   the masthead instead of floating in the middle of it. */
 .masthead-body {
   width: min(90%, var(--max-width));
   margin: 0 auto;
@@ -246,8 +249,6 @@ html, body, #root {
   flex: 1;
   min-width: 0;
   margin: 0;
-  /* Bottom space, so the wording still reads as sitting low without the
-     last line touching the edge of the masthead. */
   padding: 0 0 var(--space-6);
   text-align: left  ;
   container-type: inline-size;
@@ -268,8 +269,6 @@ html, body, #root {
   font-size: clamp(0.7rem, 1.6vw, 1rem);
 }
 
-/* The image already sits at the bottom because of the parent, so it does
-   not need its own align-self anymore. */
 .masthead-art {
   flex: 1.4;
   min-width: 0;
@@ -310,7 +309,6 @@ html, body, #root {
   margin: 0 auto;
   border: 1px solid var(--color-primary);
   border-radius: 1.5rem;
-  /* The shadow is the primary colour, so no new colour enters the palette. */
   box-shadow: 0 4px 12px var(--color-primary);
   padding: var(--space-4) var(--space-6) var(--space-3);
   display: flex;
@@ -319,7 +317,6 @@ html, body, #root {
   z-index: 1;
 }
 
-/* Three equal columns. */
 .hr-top {
   flex: 1;
   display: grid;
@@ -362,10 +359,10 @@ html, body, #root {
 }
 
 .hr-shortcut {
-  position: relative;          /* so the badge sits on the corner */
+  position: relative;       
   width: 4rem;
   height: 3.25rem;
-  min-height: 0;               /* the shared button rule sets 2.75rem */
+  min-height: 0;            
   background: transparent;
   color: var(--color-text);
   border: 2px solid var(--color-primary);
@@ -375,15 +372,18 @@ html, body, #root {
   padding: 0;
 }
 
-/* Surface, not bg, since the bar itself is already bg. */
-.hr-shortcut:hover { background: var(--color-surface); }
+.hr-shortcut:hover { 
+  background: var(--color-surface); 
+}
 
 .hr-shortcut.active {
   background: var(--color-primary);
   color: var(--color-bg);
 }
 
-.hr-shortcut.active:hover { background: var(--color-primary); }
+.hr-shortcut.active:hover { 
+  background: var(--color-primary); 
+}
 
 .hr-badge {
   position: absolute;
@@ -401,9 +401,8 @@ html, body, #root {
   place-items: center;
 }
 
-/* The hungry and bathroom columns. */
 .hr-due {
-  min-width: 0;                /* so a long pet name cannot widen the column */
+  min-width: 0;         
   border-right: 2px solid var(--color-primary);
   padding-right: var(--space-6);
 }
@@ -516,7 +515,10 @@ html, body, #root {
     padding: 0 0 var(--space-2);
     min-width: 0;
   }
-  .hr-shortcuts { justify-content: space-between; }
+
+  .hr-shortcuts { 
+    justify-content: space-between; 
+  }
 }
 
 @media (max-width: 48rem) {
@@ -588,9 +590,6 @@ html, body, #root {
 
 /* ========== Pet grid start ========== */
 
-/* Each column is a third of the row minus the 2 gaps, but never under
-   16rem, so a wide screen still stops at 3 and a narrow one drops itself
-   to 2 then 1. */
 .pet-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(max(16rem, calc((100% - 2 * var(--space-4)) / 3)), 1fr));
@@ -611,16 +610,13 @@ html, body, #root {
 .pet-card {
   background: var(--color-bg);
   border-radius: .9rem;
-  overflow: hidden;              /* clips the photo to the rounded corners */
+  overflow: hidden;            
   box-shadow: 1px 2px 3px var(--color-primary);
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-/* A square photo on a 3-column grid ended up about as tall as the card is
-   wide, which made the whole card look oversized next to the rest of the
-   page. 4 by 3 with a cap keeps it in proportion on any column width. */
 .pet-photo {
   display: block;
   width: 100%;
@@ -629,7 +625,6 @@ html, body, #root {
   object-position: center;
 }
 
-/* Surface, so the empty photo still stands out from the bg card. */
 .pet-photo-empty {
   display: grid;
   place-items: center;
@@ -637,8 +632,6 @@ html, body, #root {
   background: var(--color-surface);
 }
 
-/* The padding used to be 3rem on the sides, which left almost no room for
-   text once the card dropped to one column. */
 .pet-body {
   padding: var(--space-3) var(--space-4);
   width: 100%;
@@ -650,8 +643,6 @@ html, body, #root {
   font-size: 1.15rem;
 }
 
-/* Two pairs per row on a wide card. The pairs wrap by themselves, so the
-   list never runs off the side. */
 .pet-meta {
   margin: 0 0 var(--space-3);
   font-size: .9rem;
@@ -660,14 +651,21 @@ html, body, #root {
   gap: var(--space-1) var(--space-2);
 }
 
-.pet-meta dt { color: var(--color-text); }
-.pet-meta dt::after { content: ":"; }
-.pet-meta dd { margin: 0; min-width: 0; }
+.pet-meta dt { 
+  color: var(--color-text); 
+}
+.pet-meta dt::after { 
+  content: ":"; 
+}
+.pet-meta dd { 
+  margin: 0; 
+  min-width: 0; 
+}
 
-/* One pair per row once the card gets narrow, or the values get squeezed
-   into two or three characters each. */
 @media (max-width: 30rem) {
-  .pet-meta { grid-template-columns: auto 1fr; }
+  .pet-meta { 
+    grid-template-columns: auto 1fr; 
+  }
 }
 
 .pet-actions {
@@ -687,7 +685,7 @@ html, body, #root {
   cursor: pointer;
 }
 
-/* Red means due, green means done within the limit in format.js. */
+
 .chip-due { 
   background: var(--color-accent); 
 }
@@ -700,7 +698,10 @@ html, body, #root {
   filter: brightness(.92); 
 }
 
-.chip:disabled { opacity: .6; cursor: default; }
+.chip:disabled { 
+  opacity: .6; 
+  cursor: default; 
+}
 
 .pet-link {
   background: none;
@@ -763,7 +764,6 @@ html, body, #root {
   margin-top: var(--space-6);
 }
 
-/* One column on a phone, as many as fit after that. */
 .form .fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
@@ -787,7 +787,6 @@ label {
   color: var(--color-primary); 
 }
 
-/* Primary border, not bg, or the box disappears on the surface colour. */
 input, textarea, select {
   font: inherit;
   color: inherit;
@@ -797,8 +796,6 @@ input, textarea, select {
   padding: .5rem .6rem;
   width: 100%;
   max-width: 100%;
-  /* Under 16px, iOS Safari zooms the whole page in on focus and the user is
-     left scrolled sideways. */
   font-size: 1rem;
 }
 
@@ -854,8 +851,6 @@ button.ghost.danger:hover {
 
 /* ========== Pets page start ========== */
 
-/* Same sizing as the home pet grid, so a card is the same width on both
-   pages. Three per row on a wide screen, then 2, then 1. */
 .pet-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(max(16rem, calc((100% - 2 * var(--space-4)) / 3)), 1fr));
@@ -873,7 +868,7 @@ button.ghost.danger:hover {
   border-top: 3px solid var(--color-primary); 
   margin-bottom: 0; 
 }
-/* Same 1.15rem name as the home card, or the title dwarfs the card. */
+
 .pet-item h2 { 
   margin: 0; 
   font-size: 1.15rem; 
@@ -891,16 +886,24 @@ button.ghost.danger:hover {
   gap: .1rem; 
 }
 
-.pet-item dt { font-size: .78rem; color: var(--color-primary); }
-.pet-item dd { margin: 0 0 var(--space-2); font-size: .9rem; }
-.pet-item .ghost { margin-top: var(--space-1); }
+.pet-item dt { 
+  font-size: .78rem; 
+  color: var(--color-primary); 
+}
+
+.pet-item dd { 
+  margin: 0 0 var(--space-2); 
+  font-size: .9rem; 
+}
+
+.pet-item .ghost { 
+  margin-top: var(--space-1); 
+}
 
 .by { 
   color: var(--color-primary); 
 }
 
-/* 4 / 3 with the same 13rem cap as the home card photo, or a wide column
-   makes the photo taller than everything under it. */
 .pet-thumb {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -918,8 +921,14 @@ button.ghost.danger:hover {
   margin-top: var(--space-3);
 }
 
-.pet-title-link { color: inherit; text-decoration: none; }
-.pet-title-link:hover { text-decoration: underline; }
+.pet-title-link { 
+  color: inherit; 
+  text-decoration: none;
+}
+
+.pet-title-link:hover { 
+  text-decoration: underline; 
+}
 
 .pet-item-actions {
   display: flex;
@@ -930,19 +939,27 @@ button.ghost.danger:hover {
   margin-top: var(--space-1);
 }
 
-.pet-item-actions .pet-link { margin-left: 0; text-decoration: none; }
+.pet-item-actions .pet-link { 
+  margin-left: 0; 
+  text-decoration: none; 
+}
 
-.field-error { font-size: .82rem; color: var(--color-accent); }
+.field-error { 
+  font-size: .82rem; 
+  color: var(--color-accent); 
+}
 
-/* The shared input rule gives file inputs a box that looks broken. */
-input[type="file"] { border: none; padding: var(--space-1) 0; background: transparent; }
+input[type="file"] { 
+  border: none; 
+  padding: var(--space-1) 0; 
+  background: transparent; 
+}
 
 /* ========== Pets page end ========== */
 
 
 /* ========== Pet detail page start ========== */
  
-/* A pill, so it reads as a control and not as body text. */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -963,9 +980,6 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   border-color: var(--color-bg);
 }
  
-/* The first box. Photo on the left, info on the right. The olive edge on the
-   left is the same mark the check up box and the section heads use, so the
-   page reads as one thing instead of three stacked cards. */
 .pet-profile {
   display: flex;
   gap: var(--space-6);
@@ -978,8 +992,7 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   box-shadow: var(--shadow-lift);
 }
  
-/* A cream ring around the photo, so a dark picture does not run into the
-   card edge and a pale one still has a shape. */
+
 .pet-profile-photo {
   flex: none;
   width: 16rem;
@@ -997,15 +1010,15 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   background: var(--color-bg);
 }
  
-.pet-profile-info { flex: 1; min-width: 0; }
+.pet-profile-info { 
+  flex: 1; min-width: 0; 
+}
  
 .pet-profile-info h1 {
   margin-bottom: var(--space-1);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
 }
  
-/* The name and Edit details on one row. A row and not position: absolute,
-   so on a phone the button sits beside the name instead of over the photo. */
 .pet-profile-head {
   display: flex;
   justify-content: space-between;
@@ -1013,9 +1026,11 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   gap: var(--space-3);
 }
  
-.pet-profile-head button { flex: none; }
+.pet-profile-head button { 
+  flex: none; 
+}
  
-/* The breed line sits in a chip, so the name above it stays the focal point. */
+
 .pet-profile-info .species {
   display: inline-block;
   margin: 0 var(--space-2) var(--space-4) 0;
@@ -1026,9 +1041,6 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   font-size: .9rem;
 }
  
-/* The birthday used to be a plain grid row, easy to miss under the stats.
-   It is one fact people actually like seeing, so it gets its own small chip
-   instead of blending into the layout. */
 .pet-profile-info .detail-list {
   display: inline-flex;
   align-items: baseline;
@@ -1056,8 +1068,6 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   font-weight: 600; 
 }
  
-/* The three answers people open the page for. One small card each, so they
-   are the first thing the eye lands on after the name. */
 .pet-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
@@ -1184,9 +1194,6 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   box-shadow: var(--shadow-soft);
 }
  
-/* Red once the day has passed. The whole box changes, not one word, because
-   a late check up is the one thing on this page worth interrupting for. The
-   words beside it say "3 days late" too, so colour is not the only sign. */
 .vet-next.vet-due {
   background: var(--color-surface);
   border: 1px solid var(--color-accent);
@@ -1201,9 +1208,13 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   color: var(--color-primary);
 }
  
-.vet-next.vet-due .vet-next-label { color: var(--color-accent); }
+.vet-next.vet-due .vet-next-label { 
+  color: var(--color-accent); 
+}
  
-.vet-next-date { font-size: 1.15rem; }
+.vet-next-date { 
+  font-size: 1.15rem; 
+}
  
 .vet-next-when {
   margin-left: auto;
@@ -1213,16 +1224,18 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   font-size: .8rem;
 }
  
-.vet-list { margin-top: var(--space-4); }
+.vet-list { 
+  margin-top: var(--space-4); 
+}
  
-/* Each past visit gets a left rule instead of a divider line, so the list
-   reads as a timeline going down. */
 .vet-row {
   padding: var(--space-3) 0 var(--space-3) var(--space-4);
   border-left: 2px solid var(--color-bg);
 }
  
-.vet-row:last-child { padding-bottom: 0; }
+.vet-row:last-child { 
+  padding-bottom: 0; 
+}
  
 .vet-row-head {
   display: flex;
@@ -1231,12 +1244,19 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   gap: var(--space-2) var(--space-3);
 }
  
-.vet-when { font-size: .95rem; }
+.vet-when { 
+  font-size: .95rem; 
+}
  
-.vet-booked { margin: var(--space-1) 0 0; font-size: .85rem; }
+.vet-booked { 
+  margin: var(--space-1) 0 0; 
+  font-size: .85rem; 
+}
  
 @media (max-width: 40rem) {
-  .vet-next-when { margin-left: 0; }
+  .vet-next-when { 
+    margin-left: 0; 
+  }
 }
  
 /* ---------- The usual times box ---------- */
@@ -1248,15 +1268,23 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   box-shadow: var(--shadow-lift);
 }
  
-.routine-intro { margin: 0 0 var(--space-4); font-size: .85rem; }
+.routine-intro { 
+  margin: 0 0 var(--space-4); 
+  font-size: .85rem; 
+}
  
 .routine-row {
   padding: var(--space-4) 0;
   border-top: 1px solid var(--color-bg);
 }
  
-.routine-row:first-of-type { border-top: none; padding-top: 0; }
-.routine-row:last-child { padding-bottom: 0; }
+.routine-row:first-of-type { 
+  border-top: none; padding-top: 0; 
+}
+
+.routine-row:last-child { 
+  padding-bottom: 0; 
+}
  
 .routine-head {
   display: flex;
@@ -1266,11 +1294,15 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   margin-bottom: var(--space-3);
 }
  
-.routine-usual { font-size: 1rem; }
-.routine-count { font-size: .85rem; margin-left: auto; }
+.routine-usual { 
+  font-size: 1rem; 
+}
+
+.routine-count { 
+  font-size: .85rem; 
+  margin-left: auto; 
+}
  
-/* 24 columns, one per hour. Each bar grows from the bottom. The strip sits
-   in a cream tray, so the empty hours still show where the day runs. */
 .routine-bars {
   display: grid;
   grid-template-columns: repeat(24, 1fr);
@@ -1302,7 +1334,6 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   box-shadow: var(--shadow-soft);
 }
  
-/* Only five marks, or the labels overlap on a phone. */
 .routine-scale {
   display: flex;
   justify-content: space-between;
@@ -1312,8 +1343,14 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
 }
  
 @media (max-width: 40rem) {
-  .routine-count { margin-left: 0; }
-  .routine-bars { height: 3.5rem; gap: 1px; }
+  .routine-count { 
+    margin-left: 0; 
+  }
+  
+  .routine-bars { 
+    height: 3.5rem; 
+    gap: 1px; 
+  }
 }
  
 /* ========== Pet detail page end ========== */
@@ -1321,7 +1358,9 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
 
 /* ========== Logs page start ========== */
 
-.detail { border-color: var(--color-primary); }
+.detail { 
+  border-color: var(--color-primary); 
+}
 
 .detail-head {
   display: flex;
@@ -1331,7 +1370,9 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   gap: var(--space-4);
 }
 
-.detail-head h2 { margin: 0; }
+.detail-head h2 { 
+  margin: 0; 
+}
 
 .detail-list {
   display: grid;
@@ -1341,19 +1382,35 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   font-size: .9rem;
 }
 
-.detail-list dt { color: var(--color-primary); }
-.detail-list dd { margin: 0; overflow-wrap: anywhere; }
-
-/* One column on a phone, or a 7rem label column leaves the id squeezed into
-   a two character strip. */
-@media (max-width: 40rem) {
-  .detail-list { grid-template-columns: 1fr; gap: 0 0; }
-  .detail-list dt { margin-top: var(--space-2); }
+.detail-list dt { 
+  color: var(--color-primary); 
 }
 
-.list { list-style: none; padding: 0; margin: 0; }
+.detail-list dd { 
+  margin: 0; 
+  overflow-wrap: anywhere; 
+}
 
-.row.editing { border-color: var(--color-primary); background: var(--color-bg); }
+@media (max-width: 40rem) {
+  .detail-list { 
+    grid-template-columns: 1fr; gap: 0 0; 
+  }
+
+  .detail-list dt { 
+    margin-top: var(--space-2); 
+  }
+}
+
+.list { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+}
+
+.row.editing { 
+  border-color: var(--color-primary); 
+  background: var(--color-bg); 
+}
 
 .row-head {
   display: flex;
@@ -1363,9 +1420,15 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   gap: var(--space-2) var(--space-4);
 }
 
-.row-head h3 { margin: 0; min-width: 0; }
+.row-head h3 { 
+  margin: 0; 
+  min-width: 0; 
+}
 
-.note { margin: var(--space-2) 0 0; overflow-wrap: anywhere; }
+.note { 
+  margin: var(--space-2) 0 0; 
+  overflow-wrap: anywhere; 
+}
 
 .tag {
   font-size: .75rem;
@@ -1390,9 +1453,16 @@ input[type="file"] { border: none; padding: var(--space-1) 0; background: transp
   color: var(--color-primary);
 }
 
-.row-buttons { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.row-buttons { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: var(--space-1); 
+}
 
-code { font-size: .85em; overflow-wrap: anywhere; }
+code { 
+  font-size: .85em; 
+  overflow-wrap: anywhere; 
+}
 
 .type-picks {
   border: none;
@@ -1421,7 +1491,6 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   cursor: pointer;
 }
 
-/* The shared input rule sets width 100%, which stretches checkboxes. */
 .type-pick input {
   width: auto;
   margin: 0;
@@ -1474,10 +1543,15 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: 1.15em;
 }
 
-/* bg on primary is 5.6 : 1, so the softer text still passes contrast. */
-.site-footer .muted { color: var(--color-bg); }
+.site-footer .muted { 
+  color: var(--color-bg); 
+}
 
-.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+.footer-links { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: var(--space-1) var(--space-4); 
+}
 
 .footer-links a {
   color: var(--color-surface);
@@ -1485,9 +1559,13 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   padding: .15rem 0;
 }
 
-.footer-links a:hover { text-decoration: underline; }
+.footer-links a:hover { 
+  text-decoration: underline; 
+}
 
-.site-footer :focus-visible { outline-color: var(--color-surface); }
+.site-footer :focus-visible { 
+  outline-color: var(--color-surface); 
+}
 
 .footer-fine { 
   flex-basis: 100%; 
@@ -1570,7 +1648,9 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   margin-bottom: 0;
 }
  
-.stat-card h3 { margin: 0 0 var(--space-2); }
+.stat-card h3 { 
+  margin: 0 0 var(--space-2); 
+}
  
 .stat-list {
   margin: 0;
@@ -1580,12 +1660,22 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: .9rem;
 }
  
-.stat-list dt { color: var(--color-primary); }
-.stat-list dd { margin: 0; font-weight: 600; }
+.stat-list dt { 
+  color: var(--color-primary); 
+}
+
+.stat-list dd { 
+  margin: 0; 
+  font-weight: 600; 
+}
  
-/* Red only repeats what the words already say, it is not the only signal. */
-.stat-due { color: var(--color-accent); }
-.stat-ok { color: var(--color-primary); }
+.stat-due { 
+  color: var(--color-accent); 
+}
+
+.stat-ok { 
+  color: var(--color-primary); 
+}
  
 .stat-today {
   margin: var(--space-3) 0 0;
@@ -1595,7 +1685,9 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   color: var(--color-primary);
 }
  
-.day-group { padding-bottom: var(--space-2); }
+.day-group { 
+  padding-bottom: var(--space-2); 
+}
  
 .day-head {
   display: flex;
@@ -1607,13 +1699,18 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   border-bottom: 1px solid var(--color-bg);
 }
  
-.day-head h3 { margin: 0; }
-.day-head .muted { font-size: .85rem; }
+.day-head h3 { 
+  margin: 0; 
+}
+
+.day-head .muted { 
+  font-size: .85rem; 
+}
  
-.day-rows { display: grid; }
+.day-rows { 
+  display: grid; 
+}
  
-/* One line per log. The buttons sit at the end, so the eye can run down the
-   times and the pet names without stepping over them. */
 .log-row {
   display: flex;
   flex-wrap: wrap;
@@ -1624,8 +1721,13 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: .9rem;
 }
  
-.log-row:last-child { border-bottom: none; }
-.log-row.editing { background: var(--color-bg); }
+.log-row:last-child { 
+  border-bottom: none; 
+}
+
+.log-row.editing { 
+  background: var(--color-bg); 
+}
  
 .log-time {
   min-width: 5rem;
@@ -1633,7 +1735,6 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-variant-numeric: tabular-nums;
 }
 
-/* Fixed widths, so Fed and Walk take the same space and the notes line up. */
 .log-row .tag {
   min-width: 4.5rem;
   text-align: center;
@@ -1656,7 +1757,9 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   overflow-wrap: anywhere;
 }
  
-.log-row .row-buttons { margin-left: auto; }
+.log-row .row-buttons { 
+  margin-left: auto; 
+}
  
 @media (max-width: 48rem) {
   .log-row .row-buttons { 
@@ -1735,21 +1838,17 @@ code { font-size: .85em; overflow-wrap: anywhere; }
 /* ========== Logs stats and history end ========== */
 /* ========== Vet visits start ========== */
 
-/* The two extra fields on the log form. Same grid as .fields above it, only
-   set apart by a line so it is clear they belong to the Vet choice. */
 .vet-fields {
   margin-top: var(--space-3);
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-bg);
 }
 
-/* Vaccine or Check up, beside the Vet tag in a log row. */
 .log-kind {
   font-size: .85rem;
   color: var(--color-primary);
 }
 
-/* The follow up date at the end of a vet row. */
 .log-next {
   font-size: .8rem;
   padding: .12rem .5rem;
@@ -1779,9 +1878,6 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   box-shadow: var(--shadow-soft);
 }
  
-/* Red once the day has passed. The whole box changes, not one word, because
-   a late check up is the one thing on this page worth interrupting for. The
-   words beside it say "3 days late" too, so colour is not the only sign. */
 .vet-next.vet-due {
   background: var(--color-surface);
   border: 1px solid var(--color-accent);
@@ -1796,9 +1892,13 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   color: var(--color-primary);
 }
  
-.vet-next.vet-due .vet-next-label { color: var(--color-accent); }
+.vet-next.vet-due .vet-next-label { 
+  color: var(--color-accent); 
+}
  
-.vet-next-date { font-size: 1.15rem; }
+.vet-next-date { 
+  font-size: 1.15rem; 
+}
  
 .vet-next-when {
   margin-left: auto;
@@ -1808,16 +1908,18 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   font-size: .8rem;
 }
  
-.vet-list { margin-top: var(--space-4); }
+.vet-list { 
+  margin-top: var(--space-4); 
+}
  
-/* Each past visit gets a left rule instead of a divider line, so the list
-   reads as a timeline going down. */
 .vet-row {
   padding: var(--space-3) 0 var(--space-3) var(--space-4);
   border-left: 2px solid var(--color-bg);
 }
  
-.vet-row:last-child { padding-bottom: 0; }
+.vet-row:last-child { 
+  padding-bottom: 0; 
+}
  
 .vet-row-head {
   display: flex;
@@ -1826,11 +1928,18 @@ code { font-size: .85em; overflow-wrap: anywhere; }
   gap: var(--space-2) var(--space-3);
 }
  
-.vet-when { font-size: .95rem; }
+.vet-when { 
+  font-size: .95rem; 
+}
  
-.vet-booked { margin: var(--space-1) 0 0; font-size: .85rem; }
+.vet-booked { 
+  margin: var(--space-1) 0 0; 
+  font-size: .85rem; 
+}
  
 @media (max-width: 40rem) {
-  .vet-next-when { margin-left: 0; }
+  .vet-next-when { 
+    margin-left: 0; 
+  }
 }
  
