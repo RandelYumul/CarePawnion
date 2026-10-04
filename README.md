@@ -3,9 +3,9 @@
 A shared pet care log for households, so everyone can see when each pet was
 last fed, walked, or let out, and who did it.
 
-**Live site:** https://carepawnion.pages.dev (invite only, see [Access](#access))
-**API:** https://carepawnion.onrender.com/healthz
-**Demo video:** (link)
+**Live site:** [CarePawnion Website](https://carepawnion.pages.dev) (invite only, see [Access](#access))
+**API:** [CarePawnion API](https://carepawnion.onrender.com/healthz)
+**Demo video:** [CarePawnion Presentation Demo Video](https://drive.google.com/drive/folders/11VuUrMfoeCFuDK-2zoIXShQQ1_Eb0qzC?usp=sharing)
 
 ![A screenshot of the main screen](docs/assets/screenshot.png)
 
