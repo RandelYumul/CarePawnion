@@ -4,10 +4,11 @@ This project was built with AI assistance. This file is the record of it.
 
 The assistant was Claude by Anthropic, used through the claude.ai chat inside a
 Project that held my proposal, wireframes, rubrics, and source files. I used it
-as a guide, one step at a time. I tested each change locally and committed it
-myself. Most of the code it gave I modified, to match the project requirements
-and the lessons in the course content. For the CSS I changed many of the rules
-myself to get the design I wanted.
+as a guide, one step at a time. I decided what to build, asked for one change at
+a time, tested each change locally before committing it, and sent back
+screenshots when something looked wrong. Most of the code it gave I modified, to
+match the project requirements and the lessons in the course content. For the
+CSS I changed many of the rules myself to get the design I wanted.
 
 ## 1. How I used AI
 
@@ -75,6 +76,14 @@ myself to get the design I wanted.
 * What I kept, what I changed, and why: I first thought the bug did not happen, since my test used one type. After checking again with two types, I kept the fix. With one type the form looks the same as before.
 * Commit: https://github.com/RandelYumul/CarePawnion/commit/adc4b44
 
+### 2026-10-02 - Adding Cloudflare Access and the security checklist
+
+* Tool: Claude (claude.ai)
+* What I asked for: We were advised to add a layer so only chosen people can open the app, so I asked how to do it, then asked for help filling in the security checklist.
+* What it gave back: Two options, Cloudflare Access or a login inside the app, and the steps for Access. For the checklist, it checked each row against my code and gave commands to confirm the rest.
+* What I kept, what I changed, and why: I chose Cloudflare Access, since a login would add a sixth screen and new libraries. I ran the checks myself in PowerShell, turned on secret scanning, and tested the gate with an allowed and a blocked email. I kept three honest No answers, like the API being outside the gate.
+* Commit: https://github.com/RandelYumul/CarePawnion/commit/d2bf2f6
+
 ## 2. Where the AI got it wrong
 
 ### Case 1 - Mobile CSS that never applied
@@ -84,12 +93,12 @@ myself to get the design I wanted.
 * What I did instead: I kept one Pet details block (the newer design) and placed the phone query last in it, so nothing after it overrides it. This also removed the copied code.
 * Commit: https://github.com/RandelYumul/CarePawnion/commit/a7438b6
 
-### Case 2 - Saying the README was complete when it was not
+### Case 2 - Desktop alignment that broke small phones
 
-* What it gave me: When I asked if the README was up to date, it said yes, with only the screenshot and demo video left.
-* What was wrong with it: The badge rubric also needs a README credit, with a badge, a line naming the assistant, and a link to this file. The AI missed that row and only caught it later when I asked about the rubrics.
-* What I did instead: I added the credit section to the README.
-* Commit: https://github.com/RandelYumul/CarePawnion/commit/05c4fa7
+* What it gave me: To line up the logs on desktop, it gave fixed minimum widths to the type tag (`4.5rem`), the pet name (`6rem`), and the member (`7rem`) in `.log-row`.
+* What was wrong with it: The widths also applied on phones. At 320px the first line of each log no longer fit, so "by Randel" dropped to a line of its own and the rows looked broken.
+* What I did instead: I tested the Logs page at 320px and sent a screenshot. I kept the widths for desktop, but reset them in the phone query (tag `3.5rem`, pet and member `0`), and added a query for 360px and below with smaller text, natural tag widths, and tighter button gaps.
+* Commit: https://github.com/RandelYumul/CarePawnion/commit/6c1e9ea
 
 ### Case 3 - Mobile fix that kept the Edit button in a weird spot
 
@@ -102,17 +111,21 @@ myself to get the design I wanted.
 
 ### Written by me
 
-#### The design and responsive layout
-
-* File: `client/src/styles.css`, and the layout of the components and pages (`Navigation.jsx`, `Footer.jsx`, `Petcard.jsx`, `HomeRectangle.jsx`, `Home.jsx`, `Pets.jsx`, `Logs.jsx`, `Petdetail.jsx`)
-* Commit: https://github.com/RandelYumul/CarePawnion/commit/d0184bd, https://github.com/RandelYumul/CarePawnion/commit/e93347c, https://github.com/RandelYumul/CarePawnion/commit/3951a9d, https://github.com/RandelYumul/CarePawnion/commit/4faa57b, https://github.com/RandelYumul/CarePawnion/commit/430e3aa, https://github.com/RandelYumul/CarePawnion/commit/df35ccc, https://github.com/RandelYumul/CarePawnion/commit/a7438b6
-* What it does and why it is built this way: I first drafted a mock up design in Figma. Then I created the files and each component so they can be reused all throughout the project. At first most of the components and the design were not responsive. It looked weird on mobile and when the screen was smaller than my desktop. So I adjusted the CSS and the JSX to fit mobile and make it responsive. I adjusted the box sizing and font sizes, and changed the layout of the JSX files to fix the order of the rows and columns. The CSS properties I adjusted most were padding, margin, border, grid, color, font size, align-items, justify-content, flex, display, and position. I also reduced the colors to only five, since it was part of the instructions. I put them in `:root` as variables (`--color-primary`, `--color-accent`, `--color-bg`, `--color-surface`, `--color-text`) so they are easy to call in every rule and the colors stay the same across the app. One example is the Home card. On a phone it was too big, since Hungry and Bathroom sat in columns with a divider on the right side. I changed the top grid to one column, moved the divider line from the right to the bottom, aligned the last activity to the left, and made the date and time smaller so the card fits the screen.
+My own part covers both the backend and the frontend. On the Node, Express and
+Postgres side, I designed the `logs` table and wrote its queries. On the client,
+I made the design and the responsive layout.
 
 #### The logs data and the database queries
 
 * File: `server/db/schema.sql` (the `logs` table), `server/logsRepo.js`
 * Commit: https://github.com/RandelYumul/CarePawnion/commit/fb22e17
 * What it does and why it is built this way: I designed the logs, like what the backend and the frontend exchange, and also the queries for the database. Each log has the pet, the type (fed, walk, pee, poop, or vet), the member who did it, a note, and the time it happened. A vet log also has the vet kind and the next visit. The frontend sends these fields and the backend sends the same fields back, so both sides use one shape. In the table I added checks so only the five types are saved, and a vet log must have a vet kind while other logs cannot. I kept the same rule in the server validation too, in case a row skips the API. For the queries I wrote get all, get by id, create, update, and delete in `logsRepo.js`. They use named columns instead of `SELECT *`, and `$1` placeholders instead of putting the values in the text, so the input is safe from SQL injection. The logs are sorted by newest first, and I added an index on `happened_at` so that sort stays fast.
+
+#### The design and responsive layout
+
+* File: `client/src/styles.css`, and the layout of the components and pages (`Navigation.jsx`, `Footer.jsx`, `Petcard.jsx`, `HomeRectangle.jsx`, `Home.jsx`, `Pets.jsx`, `Logs.jsx`, `Petdetail.jsx`)
+* Commit: https://github.com/RandelYumul/CarePawnion/commit/d0184bd, https://github.com/RandelYumul/CarePawnion/commit/e93347c, https://github.com/RandelYumul/CarePawnion/commit/3951a9d, https://github.com/RandelYumul/CarePawnion/commit/4faa57b, https://github.com/RandelYumul/CarePawnion/commit/430e3aa, https://github.com/RandelYumul/CarePawnion/commit/df35ccc, https://github.com/RandelYumul/CarePawnion/commit/a7438b6
+* What it does and why it is built this way: I first drafted a mock up design in Figma. Then I created the files and each component so they can be reused all throughout the project. At first most of the components and the design were not responsive. It looked weird on mobile and when the screen was smaller than my desktop. So I adjusted the CSS and the JSX to fit mobile and make it responsive. I adjusted the box sizing and font sizes, and changed the layout of the JSX files to fix the order of the rows and columns. The CSS properties I adjusted most were padding, margin, border, grid, color, font size, align-items, justify-content, flex, display, and position. I also reduced the colors to only five, since it was part of the instructions. I put them in `:root` as variables (`--color-primary`, `--color-accent`, `--color-bg`, `--color-surface`, `--color-text`) so they are easy to call in every rule and the colors stay the same across the app. One example is the Home card. On a phone it was too big, since Hungry and Bathroom sat in columns with a divider on the right side. I changed the top grid to one column, moved the divider line from the right to the bottom, aligned the last activity to the left, and made the date and time smaller so the card fits the screen.
 
 ### The AI-written part I understand best
 
