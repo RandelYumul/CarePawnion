@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import logo from '../assets/logo.svg'
 
 // The top bar. Same plain CSS approach as the rest of the app.
 //
@@ -22,8 +23,8 @@ export default function Navigation() {
 
   return (
     <nav className="nav">
-      {/* Two spans so the brand can be two colours without an image. */}
       <Link to="/" className="brand" onClick={() => setOpen(false)}>
+        <img className="brand-logo" src={logo} alt="" />
         <span className="brand-a">Care</span><span className="brand-b">Pawnion</span>
       </Link>
 

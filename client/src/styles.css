@@ -126,6 +126,14 @@ html, body, #root {
   font-weight: 600;
   line-height: 1.1;
   text-decoration: none;
+  display: flex;
+  flex-direction: row;
+}
+
+.brand-logo {
+  height: 1.1em;
+  width: auto;
+  margin-right: var(--space-2);
 }
 
 .nav-links {
