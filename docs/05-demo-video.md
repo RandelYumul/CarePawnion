@@ -34,5 +34,5 @@ Screen recorded on the deployed site, in my own voice.
 1. **Demo mode build.** The GitHub Pages copy at
    https://randelyumul.github.io/CarePawnion/ runs in demo mode with sample data,
    in case the free API is asleep or down.
-2. **Screenshots.** The high fidelity screenshots in [mockup.md](mockup.md), for
+2. **Screenshots.** The high fidelity screenshots in [mockup.md](02-mockup.md), for
    every screen on desktop and phone.
